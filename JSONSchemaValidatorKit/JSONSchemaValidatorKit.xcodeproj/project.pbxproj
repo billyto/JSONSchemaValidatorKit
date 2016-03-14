@@ -10,6 +10,9 @@
 		219FA9891C9622CE00DAEB0C /* JSONSchemaValidatorKit.h in Headers */ = {isa = PBXBuildFile; fileRef = 219FA9881C9622CE00DAEB0C /* JSONSchemaValidatorKit.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		219FA9901C9622CE00DAEB0C /* JSONSchemaValidatorKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 219FA9851C9622CE00DAEB0C /* JSONSchemaValidatorKit.framework */; };
 		219FA9951C9622CE00DAEB0C /* JSONSchemaValidatorKitTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 219FA9941C9622CE00DAEB0C /* JSONSchemaValidatorKitTests.swift */; };
+		219FA9A01C96242B00DAEB0C /* basic-schema.json in Resources */ = {isa = PBXBuildFile; fileRef = 219FA99F1C96242B00DAEB0C /* basic-schema.json */; };
+		219FA9A41C96251300DAEB0C /* person.json in Resources */ = {isa = PBXBuildFile; fileRef = 219FA9A31C96251300DAEB0C /* person.json */; };
+		219FA9A61C962BE300DAEB0C /* JSONSchemaValidator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 219FA9A51C962BE300DAEB0C /* JSONSchemaValidator.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -29,6 +32,9 @@
 		219FA98F1C9622CE00DAEB0C /* JSONSchemaValidatorKitTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = JSONSchemaValidatorKitTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		219FA9941C9622CE00DAEB0C /* JSONSchemaValidatorKitTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JSONSchemaValidatorKitTests.swift; sourceTree = "<group>"; };
 		219FA9961C9622CE00DAEB0C /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		219FA99F1C96242B00DAEB0C /* basic-schema.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; name = "basic-schema.json"; path = "Schemes/basic-schema.json"; sourceTree = "<group>"; };
+		219FA9A31C96251300DAEB0C /* person.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; name = person.json; path = JSONSamples/person.json; sourceTree = "<group>"; };
+		219FA9A51C962BE300DAEB0C /* JSONSchemaValidator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = JSONSchemaValidator.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -73,6 +79,7 @@
 			children = (
 				219FA9881C9622CE00DAEB0C /* JSONSchemaValidatorKit.h */,
 				219FA98A1C9622CE00DAEB0C /* Info.plist */,
+				219FA9A51C962BE300DAEB0C /* JSONSchemaValidator.swift */,
 			);
 			path = JSONSchemaValidatorKit;
 			sourceTree = "<group>";
@@ -80,10 +87,28 @@
 		219FA9931C9622CE00DAEB0C /* JSONSchemaValidatorKitTests */ = {
 			isa = PBXGroup;
 			children = (
+				219FA9A21C9624D700DAEB0C /* JSONSamples */,
+				219FA9A11C96245100DAEB0C /* Schemes */,
 				219FA9941C9622CE00DAEB0C /* JSONSchemaValidatorKitTests.swift */,
 				219FA9961C9622CE00DAEB0C /* Info.plist */,
 			);
 			path = JSONSchemaValidatorKitTests;
+			sourceTree = "<group>";
+		};
+		219FA9A11C96245100DAEB0C /* Schemes */ = {
+			isa = PBXGroup;
+			children = (
+				219FA99F1C96242B00DAEB0C /* basic-schema.json */,
+			);
+			name = Schemes;
+			sourceTree = "<group>";
+		};
+		219FA9A21C9624D700DAEB0C /* JSONSamples */ = {
+			isa = PBXGroup;
+			children = (
+				219FA9A31C96251300DAEB0C /* person.json */,
+			);
+			name = JSONSamples;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -183,6 +208,8 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				219FA9A41C96251300DAEB0C /* person.json in Resources */,
+				219FA9A01C96242B00DAEB0C /* basic-schema.json in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -193,6 +220,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				219FA9A61C962BE300DAEB0C /* JSONSchemaValidator.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -307,6 +335,7 @@
 		219FA99A1C9622CE00DAEB0C /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
 				DEFINES_MODULE = YES;
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
@@ -317,12 +346,14 @@
 				PRODUCT_BUNDLE_IDENTIFIER = "json-schema.org.JSONSchemaValidatorKit";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 			};
 			name = Debug;
 		};
 		219FA99B1C9622CE00DAEB0C /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
 				DEFINES_MODULE = YES;
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;

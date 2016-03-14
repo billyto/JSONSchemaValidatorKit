@@ -11,9 +11,19 @@ import XCTest
 
 class JSONSchemaValidatorKitTests: XCTestCase {
     
+    var scheme: NSData?
+    var person: NSData?
+    
     override func setUp() {
         super.setUp()
-        // Put setup code here. This method is called before the invocation of each test method in the class.
+
+        let testBundle = NSBundle(forClass: self.dynamicType)
+        let schemaURL = testBundle.URLForResource("basic-schema", withExtension: "json")
+        let jsonURL = testBundle.URLForResource("person", withExtension: "json")
+
+        scheme = NSData(contentsOfURL: schemaURL!)
+        person = NSData(contentsOfURL: jsonURL!)
+    
     }
     
     override func tearDown() {
@@ -21,9 +31,13 @@ class JSONSchemaValidatorKitTests: XCTestCase {
         super.tearDown()
     }
     
-    func testExample() {
-        // This is an example of a functional test case.
-        // Use XCTAssert and related functions to verify your tests produce the correct results.
+    func testValidateGoodJSON() {
+        XCTAssertNotNil(scheme)
+        XCTAssertNotNil(person)
+        
+        XCTAssertTrue(person!.isValid(forScheme: scheme!))
+        
+        
     }
     
     func testPerformanceExample() {
