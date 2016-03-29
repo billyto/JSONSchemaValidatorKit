@@ -26,6 +26,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		219F79531CA9FA4D000A3E6D /* JSONScheme.playground */ = {isa = PBXFileReference; lastKnownFileType = file.playground; path = JSONScheme.playground; sourceTree = "<group>"; };
 		219FA9851C9622CE00DAEB0C /* JSONSchemaValidatorKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = JSONSchemaValidatorKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		219FA9881C9622CE00DAEB0C /* JSONSchemaValidatorKit.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = JSONSchemaValidatorKit.h; sourceTree = "<group>"; };
 		219FA98A1C9622CE00DAEB0C /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -59,6 +60,7 @@
 		219FA97B1C9622CE00DAEB0C = {
 			isa = PBXGroup;
 			children = (
+				219F79531CA9FA4D000A3E6D /* JSONScheme.playground */,
 				219FA9871C9622CE00DAEB0C /* JSONSchemaValidatorKit */,
 				219FA9931C9622CE00DAEB0C /* JSONSchemaValidatorKitTests */,
 				219FA9861C9622CE00DAEB0C /* Products */,
@@ -406,6 +408,7 @@
 				219FA99B1C9622CE00DAEB0C /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		219FA99C1C9622CE00DAEB0C /* Build configuration list for PBXNativeTarget "JSONSchemaValidatorKitTests" */ = {
 			isa = XCConfigurationList;
@@ -414,6 +417,7 @@
 				219FA99E1C9622CE00DAEB0C /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

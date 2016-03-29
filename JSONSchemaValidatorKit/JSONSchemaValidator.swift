@@ -44,8 +44,10 @@ struct Validator {
         
         if let properties = jsonScheme["properties"] as? [String:AnyObject] {
         
-            for (name, property) in properties {
+            for (name, attributes) in properties {
             
+                
+                
                 if let type = property["type"] as? String,
                     let  description = property["description"] as? String,
                     let min = property["minimum"] as? Int { //TODO: non-mandatory
@@ -66,15 +68,110 @@ struct Validator {
     //make required rule
     
     }
+    
 
 
 }
 
+
+typealias validation = Any -> Bool
+
 struct Property {
 
-    var name : String? //necesarry?
-    let type : String //enum
+    var name : String //necesarry?
     let description: String
-    let minimum: Int  //only for certain
+
+    var functionValidations :Array<validators>
+    
+    
+    enum validators {
+        case typeValidation ( PropertyType -> Bool )
+        case minValidation ( Int -> Bool )
+        case exclusiveMinimumValidation ( Bool -> Bool )
+    }
+    
+    enum PropertyType {
+    
+        case String
+        case Integer
+        case Array
+    
+    }
+    
+    init(WithName propertyName: String, attributes: [String:AnyObject]){
+    
+        name = propertyName
+        functionValidations = Array<validators>()
+        
+        for (attributeName, constraint ) in attributes {
+            
+            switch(attributeName){
+                case "type":
+                 functionValidations.append(validators.typeValidation)
+                
+                
+            }
+            
+        }
+        
+    }
+    
+    func type(propertyType: PropertyType) -> Bool{
+        return true
+    }
+    
+    func minimum(min: Int) -> Bool{
+        return true
+    }
+    
+    func exclusiveMinimum(shouldExclusiveMinimum: Bool) -> Bool{
+        return true
+    }
+
+}
+
+enum ValidatorType {
+    case typeValidation // goes with string
+    case minValidation // goes with int
+    case exclusiveMinimumValidation // goes with bool
+}
+
+enum ConstraintType{
+
+    case String
+    case Integer
+    case Array
+    case Bool
+
+}
+
+struct validatorFactory {
+
+
+    func createValidator(validation:ValidatorType, contraint: ConstraintType) -> (AnyObject) -> Bool{
+    
+    
+        switch validation{
+        case .typeValidation:  (makeTypeValidator(constraint))
+        }
+    
+    
+    }
+
+    func makeTypeValidator(constraint: ConstraintType) -> (String) -> Bool {
+    
+        switch constraint{
+            
+            case 
+            
+        }
+    
+    }
+    
+    func validateType(property: AnyObject ) -> Bool{
+        
+        return true
+    }
+    
 
 }
