@@ -3,7 +3,10 @@
     "type": "object",
     "properties": {
         "firstName": {
-            "type": "string"
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 10,
+            "pattern": "^[P|p]e",
         },
         "lastName": {
             "type": "string"

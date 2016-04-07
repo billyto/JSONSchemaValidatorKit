@@ -12,7 +12,99 @@ let jsonXPath = NSBundle.mainBundle().pathForResource("basic-schema", ofType: "j
 let jsonXData = NSData(contentsOfFile: jsonXPath!)
 let jsonScheme = try NSJSONSerialization.JSONObjectWithData(jsonXData!, options: .AllowFragments) as? [String: AnyObject]
 
+//likely not needed
+enum JSONDataType: String {
+    
+    case JSONArray = "array"
+    case JSONObject = "object"
+    case JSONString = "string"
+    case JSONInteger = "integer"
+    case JSONNumber = "number"
+    case JSONBool = "bool"
+    
+}
 
+func isValidStringConstrains(val: AnyObject, scheme:[String: AnyObject] ) -> Bool{
+
+    guard val is String else {
+        
+        return false
+    }
+    
+    let stringVar = val as! String
+    var validConstrains = true
+    
+    // 5.2.1 maxLength
+    if let maxLength = scheme["maxLength"] as? Int {
+        
+        validConstrains = stringVar.characters.count <= maxLength
+        
+    }
+    
+    // 5.2.2.  minLength
+    if let minLength = scheme["minLength"] as? Int {
+    
+        validConstrains = stringVar.characters.count >= minLength
+        
+    }
+    
+    //5.2.3.  pattern
+    if let pattern = scheme["pattern"] as? String {
+    
+        if stringVar.rangeOfString(pattern, options: .RegularExpressionSearch) == nil {
+            
+            validConstrains = false
+        }
+        
+    }
+    
+    return validConstrains
+}
+
+
+func isValidIntegerConstrains(val: AnyObject, scheme:[String: AnyObject] ) -> Bool{
+
+    guard val is Int else {
+    
+        return false
+    }
+    
+    let intVar = val as! Int
+    
+    var validConstrains = true
+    
+    if let minimumConstraint = scheme["minimum"] as? Int {
+    
+        validConstrains = minimumConstraint <= intVar
+    }
+    
+    //more int constraints
+    
+    return validConstrains
+}
+
+func constraintsCompliance(value: AnyObject, scheme: [String: AnyObject]) -> Bool{
+
+    var validConstrains = true
+    
+    guard let JSONtype = scheme["type"] as? String else{
+    
+        return false //they should throw an exception?
+    }
+    
+    switch JSONtype {
+    case "string":
+        validConstrains = isValidStringConstrains(value, scheme: scheme)
+    case "integer":
+            validConstrains = isValidIntegerConstrains(value, scheme: scheme)
+    default:
+        validConstrains = true
+    }
+    
+    
+    return validConstrains
+
+}
 
 func validate(JSONObject: [String: AnyObject], scheme:[String: AnyObject]) -> Bool{
 
@@ -20,8 +112,7 @@ func validate(JSONObject: [String: AnyObject], scheme:[String: AnyObject]) -> Bo
     
     //setup scheme
     let requiredkeys = scheme["required"] as! [String]
-    let schemeProperties = scheme["Properties"] as! [String: AnyObject]
-    
+    let schemeProperties = scheme["properties"] as! [String: AnyObject]
     
     
     //validate required
@@ -32,10 +123,8 @@ func validate(JSONObject: [String: AnyObject], scheme:[String: AnyObject]) -> Bo
     let setRequiredkeys = Set(requiredkeys)
 
     
-    
     //validate key
-    
-    var isValidType = true // needs to be inside type validation
+    var isValidConstrains = true
     
     for property in JSONObject{
     
@@ -46,27 +135,24 @@ func validate(JSONObject: [String: AnyObject], scheme:[String: AnyObject]) -> Bo
         if schemeProperties.keys.contains(propertyKey){
         
             let validator = schemeProperties[propertyKey] as! [String: AnyObject]
+            isValidConstrains = constraintsCompliance(propertyValue, scheme: validator)
             
-            
-            let propertyType = validator["type"] as! String
-            switch propertyType {
-            case "string":
-                isValidType = propertyValue is String
-            case "integer":
-                isValidType = propertyValue is Int //Int? ot another int type?
-            default:
-                isValidType = false
+            if !isValidConstrains {
+                break
             }
-            
-            //TODO: validate min
-            
         }
     
     }
     
     //print what keys are not found
-    return setRequiredkeys.subtract(JSONObjectkeys).isEmpty && isValidType
+    return setRequiredkeys.subtract(JSONObjectkeys).isEmpty && isValidConstrains
 }
 
-validate(jsonDocument!,  scheme: jsonScheme!)
+let isValid = validate(jsonDocument!, scheme:jsonScheme!)
+
+print("Do we have a valid json? \(isValid)")
+
+
+
+
 
