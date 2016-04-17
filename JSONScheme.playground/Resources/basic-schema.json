@@ -27,7 +27,21 @@
             "description": "meals per day",
             "type": "integer",
             "multipleOf": 0,
+        },
+        "children":{
+            "description": "kids",
+            "type": "array",
+            "items":[{},{}],
+            "additionalItems":true,
+        },
+        "pets":{
+            "description": "animals in the house",
+            "type": "array",
+            "maxItems": 4,
+            "minItems": 1,
+            "uniqueItems":true,
         }
+        
     },
     "required": ["firstName", "lastName"]
 }

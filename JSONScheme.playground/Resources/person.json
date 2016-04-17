@@ -5,4 +5,6 @@
  "slicesOfPizza": 3,
  "hoursOfSleep": 5,
  "meals":6,
+ "children":["bart","lisa","maggie"],
+ "pets":["santas helper", "bryan"],
 }

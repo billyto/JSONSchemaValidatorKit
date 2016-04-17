@@ -37,15 +37,17 @@ func isValidStringConstrains(val: AnyObject, scheme:[String: AnyObject] ) -> Boo
     // 5.2.1 maxLength
     if let maxLength = scheme["maxLength"] as? Int {
         
-        validConstrains = stringVar.characters.count <= maxLength
-        
+        if maxLength > 0 { //5.2.1.1.  Valid values
+            validConstrains = stringVar.characters.count <= maxLength
+        }
     }
     
     // 5.2.2.  minLength
     if let minLength = scheme["minLength"] as? Int {
     
-        validConstrains = stringVar.characters.count >= minLength
-        
+        if minLength > 0 { //5.2.2.1.  Valid values
+            validConstrains = stringVar.characters.count >= minLength
+        }
     }
     
     //5.2.3.  pattern
@@ -127,6 +129,70 @@ func isValidIntegerConstrains(val: AnyObject, scheme:[String: AnyObject] ) -> Bo
     return validConstrains
 }
 
+func isValidArrayConstrains(val: AnyObject, scheme:[String: AnyObject] ) -> Bool{
+
+    guard val is Array<AnyObject> else {
+        
+        return false
+    }
+    
+    let arrayVar = val as! Array<AnyObject>
+    
+    var validConstrains = true
+    
+    //5.3.1.  additionalItems and items
+    if let additionalItems = scheme["additionalItems"] as?  Bool {
+    
+        if !additionalItems {
+        
+            if let items = scheme["items"] as? Array<AnyObject> {
+                validConstrains = arrayVar.count <= items.count
+            } else{
+                validConstrains = true
+            }
+            
+        }else{
+        
+            validConstrains = true
+        }
+    
+    }
+    
+    //5.3.2.  maxItems
+    if let maxItems = scheme["maxItems"] as? Int {
+        
+        if maxItems > 0 { //5.3.2.1.  Valid values
+            validConstrains = arrayVar.count <= maxItems
+        }
+    }
+    
+    //5.3.3.  minItems
+    if let minItems = scheme["minItems"] as? Int {
+        
+        if minItems > 0 { //5.3.3.1.  Valid values
+            validConstrains = arrayVar.count >= minItems
+        }
+    }
+    
+    //5.3.4.  uniqueItems
+    if let uniqueItems = scheme["uniqueItems"] as? Bool {
+    
+        if uniqueItems {
+            
+            if let anies = arrayVar as? Array<String> { //TODO: is this safe? what for other objects?
+                
+                let uniques = Set(anies)
+                validConstrains = arrayVar.count == uniques.count
+            
+            }
+        }
+    
+    }
+    
+    
+    return validConstrains
+}
+
 
 
 func constraintsCompliance(value: AnyObject, scheme: [String: AnyObject]) -> Bool{
@@ -143,6 +209,8 @@ func constraintsCompliance(value: AnyObject, scheme: [String: AnyObject]) -> Boo
         validConstrains = isValidStringConstrains(value, scheme: scheme)
     case "integer":
             validConstrains = isValidIntegerConstrains(value, scheme: scheme)
+    case "array":
+        validConstrains = isValidArrayConstrains(value, scheme: scheme)
     default:
         validConstrains = true
     }
