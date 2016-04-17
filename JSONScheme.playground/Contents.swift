@@ -73,15 +73,61 @@ func isValidIntegerConstrains(val: AnyObject, scheme:[String: AnyObject] ) -> Bo
     
     var validConstrains = true
     
+    
+    //5.1.1.  multipleOf
+    if let multipleOf = scheme["multipleOf"] as? Int {
+    
+        if multipleOf > 0 { //5.1.1.1.  Valid values
+            validConstrains = (intVar %  multipleOf) == 0
+        }
+    }
+    
+    
+    //5.1.2.  maximum and exclusiveMaximum
+    if let maximumConstraint = scheme["maximum"] as? Int {
+        
+        if let exclusiveMax = scheme["exclusiveMaximum"] as? Bool {
+            
+            if exclusiveMax {
+                validConstrains = maximumConstraint > intVar
+            }else {
+                validConstrains = maximumConstraint >= intVar //TODO: code repeated
+            }
+            
+        } else {
+            
+            validConstrains = maximumConstraint >= intVar
+            
+        }
+    }
+    
+    
+    
+    //5.1.3. minimum and exclusiveMinimum
     if let minimumConstraint = scheme["minimum"] as? Int {
     
-        validConstrains = minimumConstraint <= intVar
+        if let exclusiveMin = scheme["exclusiveMinimum"] as? Bool {
+        
+            if exclusiveMin {
+                 validConstrains = minimumConstraint < intVar
+            }else {
+                 validConstrains = minimumConstraint <= intVar //TODO: code repeated
+            }
+            
+        } else {
+            
+           validConstrains = minimumConstraint <= intVar
+        
+        }
     }
+    
     
     //more int constraints
     
     return validConstrains
 }
+
+
 
 func constraintsCompliance(value: AnyObject, scheme: [String: AnyObject]) -> Bool{
 

@@ -14,7 +14,19 @@
         "age": {
             "description": "Age in years",
             "type": "integer",
-            "minimum": 0
+            "minimum": 10,
+            "exclusiveMinimum": false,
+        },
+        "slicesOfPizza":{
+            "description": "Slices of pizza per day",
+            "type": "integer",
+            "maximum": 4,
+            "exclusiveMaximum": true,
+        },
+        "meals":{
+            "description": "meals per day",
+            "type": "integer",
+            "multipleOf": 0,
         }
     },
     "required": ["firstName", "lastName"]

@@ -1,5 +1,8 @@
 {
  "firstName":"Peter",
  "lastName":"Griffin",
- "age":12
+ "age":11,
+ "slicesOfPizza": 3,
+ "hoursOfSleep": 5,
+ "meals":6,
 }
