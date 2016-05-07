@@ -193,6 +193,138 @@ func isValidArrayConstrains(val: AnyObject, scheme:[String: AnyObject] ) -> Bool
     return validConstrains
 }
 
+func isValidObjectConstrains(val: AnyObject, scheme:[String: AnyObject] ) -> Bool{
+
+    guard val is [String: AnyObject] else {
+        
+        return false
+    }
+    
+    let objectVar = val as! [String: AnyObject]
+    
+    var validConstrains = true
+
+    
+    //5.4.1.  maxProperties
+    if let maxProperties = scheme["maxProperties"] as? Int {
+        
+        if maxProperties >= 0 { //5.4.1.1.  Valid values
+            
+            validConstrains =  objectVar.keys.count <= maxProperties
+        }
+    }
+    
+    //5.4.2.  minProperties
+    if let minProperties = scheme["minProperties"] as? Int {
+        
+        if minProperties >= 0 { //5.4.2.1.  Valid values
+            
+            validConstrains =  objectVar.keys.count >= minProperties
+        }
+    }
+    
+    //5.4.3.  required
+    if let requiredProperties = scheme["required"] as? Array<String> {
+        
+        if requiredProperties.count > 0 { //5.4.3.1.  Valid values
+            
+            let uniqueRequiredProperties = Array(Set(requiredProperties)) //TODO: ugly
+            
+            for required in uniqueRequiredProperties {
+                
+                if !objectVar.keys.contains(required){
+                    validConstrains = false
+                    break
+                }
+                
+            }
+        }
+    }
+    
+    
+    //5.4.4.  additionalProperties, properties and patternProperties
+    
+    if scheme["additionalProperties"] is Bool {
+        
+        if scheme["additionalProperties"] as! Bool == false {
+        
+            let s = Array(objectVar.keys)
+            if let p = scheme["properties"] as? [String: AnyObject] {
+            
+                var sSansP = s.filter{ //take all the declared properties
+                    !p.keys.contains($0)
+                }
+                print("filtering \(sSansP.count)")
+            
+                if sSansP.count > 0 { // still elements
+                    
+                    if let pp = scheme["patternProperties"] as? [String: AnyObject] {
+                    
+                        for ppk in pp.keys {
+                            
+                            sSansP = sSansP.filter {
+                                
+                                $0.rangeOfString(ppk, options: .RegularExpressionSearch) == nil
+                            }
+                        }
+                        print("\(sSansP.count) left for dead")
+                         validConstrains =  sSansP.count == 0 //validates if this is empty
+                        
+                    } else{
+                        validConstrains = false //no patterns and still keys
+                    }
+                }
+            }
+        }
+    }// if additionalProperties is a scheme, it succeeds
+    
+ 
+    //    5.4.5.  dependencies
+    if let dependencies = scheme["dependencies"] as? [String: AnyObject] {
+    
+        for (k,v) in dependencies {
+        
+            if let dependeciesArray = v as? Array<String>{
+                
+                Set(dependeciesArray)
+            }
+            
+            
+            if let propertyDepencies = v as? Array<String> { //Property dependency
+            print (propertyDepencies)
+                let s = Set(objectVar.keys)
+                let dependeciesSet = Set(propertyDepencies)
+                
+                if s.contains(k) && !dependeciesSet.isSubsetOf(s)  {
+                    
+                    validConstrains = false
+                    break
+                    
+                }
+            } else if let schemaDependecy = v as? [String: AnyObject]  {  // Schema dependency
+                
+                print("scheme? \(schemaDependecy)")
+                
+                let s = Array(objectVar.keys)
+                if s.contains(k) {
+                
+                    
+                
+                    validConstrains = constraintsCompliance(objectVar, scheme: schemaDependecy)
+                }
+                
+                
+                
+            }
+        }
+    
+    
+    }
+    
+    
+    return validConstrains
+
+}
 
 
 func constraintsCompliance(value: AnyObject, scheme: [String: AnyObject]) -> Bool{
@@ -211,15 +343,18 @@ func constraintsCompliance(value: AnyObject, scheme: [String: AnyObject]) -> Boo
             validConstrains = isValidIntegerConstrains(value, scheme: scheme)
     case "array":
         validConstrains = isValidArrayConstrains(value, scheme: scheme)
+    case "object":
+        validConstrains = isValidObjectConstrains(value, scheme: scheme)
     default:
         validConstrains = true
     }
     
-    
+    //TODO: false results might get cleared later down for a positive result
     return validConstrains
 
 }
 
+//isValidObjectConstrains and validate might be the same function
 func validate(JSONObject: [String: AnyObject], scheme:[String: AnyObject]) -> Bool{
 
     print(JSONObject)

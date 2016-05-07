@@ -40,7 +40,28 @@
             "maxItems": 4,
             "minItems": 1,
             "uniqueItems":true,
+        },
+        "car":{
+            "description": "family vehicle",
+            "type": "object",
+            "maxProperties": 9,
+            "minProperties": 2,
+            "required": ["brand","year"],
+            "additionalProperties": false,
+            "properties":{  "brand":{},
+                            "year":{}
+                         },
+            "patternProperties": {
+                "^col": {},
+                "^mil": {"type": "integer",
+                         "multipleOf":100}
+            },
+            "dependencies":{
+                "brand":["year","color"],
+                "miles":{"minimum":100, "maximum":1000},
+            },
         }
+        
         
     },
     "required": ["firstName", "lastName"]
