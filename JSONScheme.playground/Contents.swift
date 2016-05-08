@@ -204,79 +204,79 @@ func isValidObjectConstrains(val: AnyObject, scheme:[String: AnyObject] ) -> Boo
     
     var validConstrains = true
 
+//
+//    //5.4.1.  maxProperties
+//    if let maxProperties = scheme["maxProperties"] as? Int {
+//        
+//        if maxProperties >= 0 { //5.4.1.1.  Valid values
+//            
+//            validConstrains =  objectVar.keys.count <= maxProperties
+//        }
+//    }
+//    
+//    //5.4.2.  minProperties
+//    if let minProperties = scheme["minProperties"] as? Int {
+//        
+//        if minProperties >= 0 { //5.4.2.1.  Valid values
+//            
+//            validConstrains =  objectVar.keys.count >= minProperties
+//        }
+//    }
+//    
+//    //5.4.3.  required
+//    if let requiredProperties = scheme["required"] as? Array<String> {
+//        
+//        if requiredProperties.count > 0 { //5.4.3.1.  Valid values
+//            
+//            let uniqueRequiredProperties = Array(Set(requiredProperties)) //TODO: ugly
+//            
+//            for required in uniqueRequiredProperties {
+//                
+//                if !objectVar.keys.contains(required){
+//                    validConstrains = false
+//                    break
+//                }
+//                
+//            }
+//        }
+//    }
+
     
-    //5.4.1.  maxProperties
-    if let maxProperties = scheme["maxProperties"] as? Int {
-        
-        if maxProperties >= 0 { //5.4.1.1.  Valid values
-            
-            validConstrains =  objectVar.keys.count <= maxProperties
-        }
-    }
-    
-    //5.4.2.  minProperties
-    if let minProperties = scheme["minProperties"] as? Int {
-        
-        if minProperties >= 0 { //5.4.2.1.  Valid values
-            
-            validConstrains =  objectVar.keys.count >= minProperties
-        }
-    }
-    
-    //5.4.3.  required
-    if let requiredProperties = scheme["required"] as? Array<String> {
-        
-        if requiredProperties.count > 0 { //5.4.3.1.  Valid values
-            
-            let uniqueRequiredProperties = Array(Set(requiredProperties)) //TODO: ugly
-            
-            for required in uniqueRequiredProperties {
-                
-                if !objectVar.keys.contains(required){
-                    validConstrains = false
-                    break
-                }
-                
-            }
-        }
-    }
-    
-    
-    //5.4.4.  additionalProperties, properties and patternProperties
-    
-    if scheme["additionalProperties"] is Bool {
-        
-        if scheme["additionalProperties"] as! Bool == false {
-        
-            let s = Array(objectVar.keys)
-            if let p = scheme["properties"] as? [String: AnyObject] {
-            
-                var sSansP = s.filter{ //take all the declared properties
-                    !p.keys.contains($0)
-                }
-                print("filtering \(sSansP.count)")
-            
-                if sSansP.count > 0 { // still elements
-                    
-                    if let pp = scheme["patternProperties"] as? [String: AnyObject] {
-                    
-                        for ppk in pp.keys {
-                            
-                            sSansP = sSansP.filter {
-                                
-                                $0.rangeOfString(ppk, options: .RegularExpressionSearch) == nil
-                            }
-                        }
-                        print("\(sSansP.count) left for dead")
-                         validConstrains =  sSansP.count == 0 //validates if this is empty
-                        
-                    } else{
-                        validConstrains = false //no patterns and still keys
-                    }
-                }
-            }
-        }
-    }// if additionalProperties is a scheme, it succeeds
+//    //5.4.4.  additionalProperties, properties and patternProperties
+//    
+//    if scheme["additionalProperties"] is Bool {
+//        
+//        if scheme["additionalProperties"] as! Bool == false {
+//        
+//            let s = Array(objectVar.keys)
+//            if let p = scheme["properties"] as? [String: AnyObject] {
+//            
+//                var sSansP = s.filter{ //take all the declared properties
+//                    !p.keys.contains($0)
+//                }
+//                print("filtering \(sSansP.count)")
+//            
+//                if sSansP.count > 0 { // still elements
+//                    
+//                    if let pp = scheme["patternProperties"] as? [String: AnyObject] {
+//                    
+//                        for ppk in pp.keys {
+//                            
+//                            sSansP = sSansP.filter {
+//                                
+//                                $0.rangeOfString(ppk, options: .RegularExpressionSearch) == nil
+//                            }
+//                        }
+//                        print("\(sSansP.count) left for dead")
+//                         validConstrains =  sSansP.count == 0 //validates if this is empty
+//                        
+//                    } else{
+//                        validConstrains = false //no patterns and still keys
+//                    }
+//                }
+//            }
+//        }
+//    }// if additionalProperties is a scheme, it succeeds
     
  
     //    5.4.5.  dependencies
@@ -355,7 +355,7 @@ func constraintsCompliance(value: AnyObject, scheme: [String: AnyObject]) -> Boo
 }
 
 //isValidObjectConstrains and validate might be the same function
-func validate(JSONObject: [String: AnyObject], scheme:[String: AnyObject]) -> Bool{
+func oldvalidate(JSONObject: [String: AnyObject], scheme:[String: AnyObject]) -> Bool{
 
     print(JSONObject)
     
@@ -397,9 +397,202 @@ func validate(JSONObject: [String: AnyObject], scheme:[String: AnyObject]) -> Bo
     return setRequiredkeys.subtract(JSONObjectkeys).isEmpty && isValidConstrains
 }
 
-let isValid = validate(jsonDocument!, scheme:jsonScheme!)
+struct validationResult { //TODO: turn into enum?
 
-print("Do we have a valid json? \(isValid)")
+    var isValid: Bool!
+    var message: String?
+
+}
+
+//5.4.1.  maxProperties
+func maxPropertiesValidation(JSONObject: [String: AnyObject], withSchema schema:[String: AnyObject]) -> validationResult {
+
+    if let maxProperties = schema["maxProperties"] as? Int {
+        
+        if maxProperties >= 0 { //5.4.1.1.  Valid values
+            
+            let propertiesCount = JSONObject.keys.count
+            
+            if  !(propertiesCount <= maxProperties) {
+                
+               return validationResult(isValid: false, message:"Number of properties \(propertiesCount) exceeds maxProperties \(maxProperties).")
+            
+            }
+        }
+    }
+    
+    return validationResult(isValid: true, message:nil)
+    
+}
+
+//5.4.2.  minProperties
+func minPropertiesValidation(JSONObject: [String: AnyObject], withSchema schema:[String: AnyObject]) -> validationResult {
+
+    if let minProperties = schema["minProperties"] as? Int {
+        
+        if minProperties >= 0 { //5.4.2.1.  Valid values
+            
+            let propertiesCount = JSONObject.keys.count
+            
+            if  !(propertiesCount >= minProperties) {
+                
+               return validationResult(isValid: false, message:"Number of properties \(propertiesCount) is inferior to maxProperties \(minProperties).")
+                
+            }
+        }
+    }
+    
+    return validationResult(isValid: true, message:nil)
+
+}
+
+//5.4.3.  required
+func requiredPropertiesValidation(JSONObject: [String: AnyObject], withSchema schema:[String: AnyObject]) -> validationResult {
+
+    if let requiredProperties = schema["required"] as? Array<String> {
+        
+        let requiredPropertiesSet = Set(requiredProperties)
+        let schemaPropertiesSet = Set(JSONObject.keys)
+        
+        let missingRequired = requiredPropertiesSet.subtract(schemaPropertiesSet)
+        
+        if missingRequired.count > 0 {
+        
+            let missed = missingRequired.joinWithSeparator(", ")
+            
+            return validationResult(isValid: false, message: "missing \(missingRequired.count) element(s) [\(missed)] for required = [\(requiredProperties.joinWithSeparator(", "))].")
+        }
+    }
+    
+    return validationResult(isValid: true, message:nil)
+
+}
+
+//5.4.4. additionalProperties, properties and patternProperties
+func propertiesPresenceValidation(JSONObject: [String: AnyObject], withSchema schema:[String: AnyObject]) -> validationResult {
+
+    
+    if  schema["additionalProperties"] is Bool {
+        
+        if schema["additionalProperties"] as! Bool == false {
+            
+            let s = Array(JSONObject.keys)
+            if let p = schema["properties"] as? [String: AnyObject] {
+                
+                var sSansP = s.filter{ //take all the declared properties
+                    !p.keys.contains($0)
+                }
+//                print("filtering \(sSansP.count)")
+                
+                if sSansP.count > 0 { // still elements
+                    
+                    if let pp = schema["patternProperties"] as? [String: AnyObject]  {
+                        
+                        for regex in pp.keys {
+                            
+                            sSansP = sSansP.filter {
+                                
+                                $0.rangeOfString(regex, options: .RegularExpressionSearch) == nil
+                            }
+                        }
+//                        print("\(sSansP.count) left for dead")
+                    }
+                }
+                
+                if sSansP.count > 0 {
+                
+                 return validationResult(isValid: false, message:"Invalid additional properties are present [\(sSansP.joinWithSeparator(", "))].")
+                }
+                
+                
+            }
+        } // additionalProperties = true will validate constraint
+    }
+    
+    return validationResult(isValid: true, message:nil)
+
+}
+
+func validate(JSONObject: [String: AnyObject], withSchema schema:[String: AnyObject]) -> validationResult{
+
+   
+    
+    let minProperties = minPropertiesValidation(JSONObject, withSchema:schema)
+    if !minProperties.isValid {
+        return minProperties
+    }
+    
+    let maxProperties = maxPropertiesValidation(JSONObject, withSchema:schema)
+    if !maxProperties.isValid {
+        return maxProperties
+    }
+
+    let required = requiredPropertiesValidation(JSONObject, withSchema:schema)
+    if !required.isValid {
+        return required
+    }
+    
+    let propertiesPresence = propertiesPresenceValidation(JSONObject, withSchema:schema)
+    if !propertiesPresence.isValid {
+        return propertiesPresence
+    }
+    
+    
+    if let schemaProperties = schema["properties"] as? [String: AnyObject] {
+    
+        for property in schemaProperties {
+        
+            let schemaPropertyKey = property.0
+            
+            if JSONObject[schemaPropertyKey] != nil { // TODO validate by type
+            
+                if JSONObject[schemaPropertyKey] is Array<AnyObject>{
+                 print("Soy un array \(schemaPropertyKey)")
+                }
+                
+                
+                if JSONObject[schemaPropertyKey] is [String:AnyObject]{
+                    
+                    print("Soy un objeto \(schemaPropertyKey)")
+                    if let subJSONObject = JSONObject[schemaPropertyKey] as? [String:AnyObject]{
+                        print(property.1)
+                        let result = validate(subJSONObject, withSchema: property.1 as! [String : AnyObject]  )
+                        
+                        if !result.isValid{
+                            
+                            return result
+                        }
+                        
+                    }
+                    
+                    
+                }
+                if JSONObject[schemaPropertyKey] is Int{
+                    print("Soy un numero \(schemaPropertyKey)")
+                }
+                if JSONObject[schemaPropertyKey] is Bool{
+                    print("Soy un Bool \(schemaPropertyKey)")
+                }
+            
+            }
+            
+        }
+        
+    }
+    
+    //TODO: validate for additional attributes and patterns
+    //TODO: validate for dependecies scheme and property dependency
+    
+    
+    
+    return validationResult(isValid: true, message: nil)
+}
+
+
+let result = validate(jsonDocument! , withSchema:jsonScheme!)
+
+print("Do we have a valid json? \(result.isValid)")
+print(result.message)
 
 
 

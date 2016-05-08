@@ -44,7 +44,7 @@
         "car":{
             "description": "family vehicle",
             "type": "object",
-            "maxProperties": 9,
+            "maxProperties": 3,
             "minProperties": 2,
             "required": ["brand","year"],
             "additionalProperties": false,
@@ -64,5 +64,14 @@
         
         
     },
-    "required": ["firstName", "lastName"]
+    "required": ["firstName", "lastName"],
+    "maxProperties": 20,
+    "minProperties": 2,
+    "additionalProperties": true,
+    "patternProperties": {
+        "^hou": {},
+        "^mil": {"type": "integer",
+            "multipleOf":100}
+    },
+    
 }
