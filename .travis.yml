@@ -1,0 +1,4 @@
+language: objective-c
+xcode_project: JSONSchemaValidatorKit.xcodeproj # path to your xcodeproj folder
+xcode_scheme: JSONSchemaValidatorKit
+osx_image: xcode7.3
