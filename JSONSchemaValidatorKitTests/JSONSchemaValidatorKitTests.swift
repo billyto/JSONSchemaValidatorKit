@@ -11,7 +11,7 @@ import XCTest
 
 class JSONSchemaValidatorKitTests: XCTestCase {
     
-    var scheme: NSData?
+    var schema: NSData?
     var person: NSData?
     
     override func setUp() {
@@ -21,7 +21,7 @@ class JSONSchemaValidatorKitTests: XCTestCase {
         let schemaURL = testBundle.URLForResource("basic-schema", withExtension: "json")
         let jsonURL = testBundle.URLForResource("person", withExtension: "json")
 
-        scheme = NSData(contentsOfURL: schemaURL!)
+        schema = NSData(contentsOfURL: schemaURL!)
         person = NSData(contentsOfURL: jsonURL!)
     
     }
@@ -32,10 +32,15 @@ class JSONSchemaValidatorKitTests: XCTestCase {
     }
     
     func testValidateGoodJSON() {
-        XCTAssertNotNil(scheme)
+        XCTAssertNotNil(schema)
         XCTAssertNotNil(person)
         
-        XCTAssertTrue(person!.isValid(forScheme: scheme!))
+
+        let validator  = SchemaValidator(withSchema: schema!)
+        
+        let result : validationResult = validator.validateJSON(person!)
+        
+        XCTAssertTrue(result.isValid)
         
         
     }
