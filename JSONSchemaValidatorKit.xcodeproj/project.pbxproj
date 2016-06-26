@@ -7,7 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		2181494A1D1F200F0016A104 /* oldies in Resources */ = {isa = PBXBuildFile; fileRef = 218149491D1F200F0016A104 /* oldies */; };
+		2181494C1D2039F80016A104 /* not-an-schema.txt in Resources */ = {isa = PBXBuildFile; fileRef = 2181494B1D2039F80016A104 /* not-an-schema.txt */; };
 		219FA9891C9622CE00DAEB0C /* JSONSchemaValidatorKit.h in Headers */ = {isa = PBXBuildFile; fileRef = 219FA9881C9622CE00DAEB0C /* JSONSchemaValidatorKit.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		219FA9901C9622CE00DAEB0C /* JSONSchemaValidatorKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 219FA9851C9622CE00DAEB0C /* JSONSchemaValidatorKit.framework */; };
 		219FA9951C9622CE00DAEB0C /* JSONSchemaValidatorKitTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 219FA9941C9622CE00DAEB0C /* JSONSchemaValidatorKitTests.swift */; };
@@ -27,7 +27,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		218149491D1F200F0016A104 /* oldies */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = oldies; sourceTree = "<group>"; };
+		2181494B1D2039F80016A104 /* not-an-schema.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "not-an-schema.txt"; sourceTree = "<group>"; };
 		219F79531CA9FA4D000A3E6D /* JSONScheme.playground */ = {isa = PBXFileReference; lastKnownFileType = file.playground; path = JSONScheme.playground; sourceTree = "<group>"; };
 		219FA9851C9622CE00DAEB0C /* JSONSchemaValidatorKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = JSONSchemaValidatorKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		219FA9881C9622CE00DAEB0C /* JSONSchemaValidatorKit.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = JSONSchemaValidatorKit.h; sourceTree = "<group>"; };
@@ -84,7 +84,6 @@
 				219FA9881C9622CE00DAEB0C /* JSONSchemaValidatorKit.h */,
 				219FA98A1C9622CE00DAEB0C /* Info.plist */,
 				219FA9A51C962BE300DAEB0C /* JSONSchemaValidator.swift */,
-				218149491D1F200F0016A104 /* oldies */,
 			);
 			path = JSONSchemaValidatorKit;
 			sourceTree = "<group>";
@@ -104,6 +103,7 @@
 			isa = PBXGroup;
 			children = (
 				219FA99F1C96242B00DAEB0C /* basic-schema.json */,
+				2181494B1D2039F80016A104 /* not-an-schema.txt */,
 			);
 			name = Schemes;
 			sourceTree = "<group>";
@@ -207,7 +207,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				2181494A1D1F200F0016A104 /* oldies in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -216,6 +215,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				219FA9A41C96251300DAEB0C /* person.json in Resources */,
+				2181494C1D2039F80016A104 /* not-an-schema.txt in Resources */,
 				219FA9A01C96242B00DAEB0C /* basic-schema.json in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

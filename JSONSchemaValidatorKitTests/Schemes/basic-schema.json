@@ -3,7 +3,10 @@
     "type": "object",
     "properties": {
         "firstName": {
-            "type": "string"
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 10,
+            "pattern": "^[P|p]e",
         },
         "lastName": {
             "type": "string"
@@ -11,8 +14,64 @@
         "age": {
             "description": "Age in years",
             "type": "integer",
-            "minimum": 0
+            "minimum": 10,
+            "exclusiveMinimum": false,
+        },
+        "slicesOfPizza":{
+            "description": "Slices of pizza per day",
+            "type": "integer",
+            "maximum": 4,
+            "exclusiveMaximum": true,
+        },
+        "meals":{
+            "description": "meals per day",
+            "type": "integer",
+            "multipleOf": 0,
+        },
+        "children":{
+            "description": "kids",
+            "type": "array",
+            "items":[{},{}],
+            "additionalItems":true,
+        },
+        "pets":{
+            "description": "animals in the house",
+            "type": "array",
+            "maxItems": 4,
+            "minItems": 1,
+            "uniqueItems":true,
+        },
+        "car":{
+            "description": "family vehicle",
+            "type": "object",
+            "maxProperties": 4,
+            "minProperties": 2,
+            "required": ["brand","year"],
+            "additionalProperties": false,
+            "properties":{  "brand":{},
+                "year":{}
+            },
+            "patternProperties": {
+                "^col": {},
+                "^mil": {"type": "integer",
+                    "multipleOf":100}
+            },
+            "dependencies":{
+                "brand":["year","color"],
+                "miles":{"minimum":100, "maximum":1000},
+            },
         }
+        
+        
     },
-    "required": ["firstName", "lastName"]
+    "required": ["firstName", "lastName"],
+    "maxProperties": 20,
+    "minProperties": 2,
+    "additionalProperties": true,
+    "patternProperties": {
+        "^hou": {},
+        "^mil": {"type": "integer",
+            "multipleOf":100}
+    },
+    
 }

@@ -1,5 +1,19 @@
 {
- "firstName":"Peter",
- "lastName":"Griffin",
- "age":42
+    "firstName":"Peter",
+    "lastName":"Griffin",
+    "age":11,
+    "slicesOfPizza": 3,
+    "hoursOfSleep": 5,
+    "meals":6,
+    "children":["bart","lisa","maggie"],
+    "pets":["santas helper", "bryan"],
+    "car":{
+        "brand":"tesla",
+        "year":"2016",
+        "color":"red",
+        "miles":500,
+        
+    },
+    "favFood":"sammiches",
+    
 }

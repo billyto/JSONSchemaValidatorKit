@@ -31,15 +31,15 @@ class SchemaValidator {
 
     var schema: Payload!
     
-    init(withSchema schema:NSData) {
+    init(withSchema schema:NSData) throws {
     
         do {
         
             self.schema = try NSJSONSerialization.JSONObjectWithData(schema, options: NSJSONReadingOptions()) as? Payload
+            //TODO: add optional validation against v4
             
         } catch {
-            //TODO: throw this
-            print(error)
+            throw error
             
         }
     }
@@ -47,7 +47,7 @@ class SchemaValidator {
     init(withSchema schema:[String: AnyObject]) {
     
         self.schema = schema
-    
+        //TODO: add optional validation against v4
     }
     
 
@@ -65,18 +65,11 @@ class SchemaValidator {
         
         do {
             
-            if let JSONObject = try NSJSONSerialization.JSONObjectWithData(JSONObject, options: NSJSONReadingOptions()) as? Payload {
-                validation = validateJSON(JSONObject)
-            } else {
-                validation = validationResult(isValid: false, message: "NSData is not a valid JSON payload")
-            }
-            
+            let JSONObject: Payload = try NSJSONSerialization.JSONObjectWithData(JSONObject, options: NSJSONReadingOptions()) as! Payload
+            validation = validateJSON(JSONObject)
             
         } catch {
-            //TODO: throw this
-            print(error)
             validation = validationResult(isValid: false, message:"serialization issue: \(error)")
-            
         }
         
         return validation;
@@ -169,11 +162,12 @@ class SchemaValidator {
     }
     
     
-    func isValidStringConstrains(val: AnyObject, schema:[String: AnyObject] ) -> Bool{
+    func isValidStringConstrains(val: AnyObject, schema:[String: AnyObject] ) -> validationResult{
+        
         
         guard val is String else {
             
-            return false
+            return validationResult(isValid: false, message: "Value \(val) is not a String.")
         }
         
         let stringVar = val as! String
@@ -184,6 +178,9 @@ class SchemaValidator {
             
             if maxLength > 0 { //5.2.1.1.  Valid values
                 validConstrains = stringVar.characters.count <= maxLength
+                if !validConstrains {
+                    return validationResult(isValid: false, message: "max length \(maxLength) not passing to \(stringVar).")
+                }
             }
         }
         
@@ -192,6 +189,9 @@ class SchemaValidator {
             
             if minLength > 0 { //5.2.2.1.  Valid values
                 validConstrains = stringVar.characters.count >= minLength
+                if !validConstrains {
+                    return validationResult(isValid: false, message: "min length \(minLength) not passing to \(stringVar).")
+                }
             }
         }
         
@@ -200,20 +200,22 @@ class SchemaValidator {
             
             if stringVar.rangeOfString(pattern, options: .RegularExpressionSearch) == nil {
                 
-                validConstrains = false
+                if !validConstrains {
+                    return validationResult(isValid: false, message: "Pattern \(pattern) not passing to \(stringVar).")
+                }
             }
             
         }
         
-        return validConstrains
+        return validationResult(isValid: true, message: nil)
     }
     
     
-    func isValidIntegerConstrains(val: AnyObject, schema:[String: AnyObject] ) -> Bool{
+    func isValidIntegerConstrains(val: AnyObject, schema:[String: AnyObject] ) -> validationResult{
         
         guard val is Int else {
             
-            return false
+            return validationResult(isValid: false, message: "Value \(val) is not a Integer.")
         }
         
         let intVar = val as! Int
@@ -226,6 +228,9 @@ class SchemaValidator {
             
             if multipleOf > 0 { //5.1.1.1.  Valid values
                 validConstrains = (intVar %  multipleOf) == 0
+                if !validConstrains {
+                    return validationResult(isValid: false, message: "multipleOf \(multipleOf) not passing to \(intVar).")
+                }
             }
         }
         
@@ -245,6 +250,9 @@ class SchemaValidator {
                 
                 validConstrains = maximumConstraint >= intVar
                 
+            }
+            if !validConstrains {
+                return validationResult(isValid: false, message: "maximum/exclusiveMaximum \(maximumConstraint) not passing to \(intVar).") //TODO: Separate maximum and maxExclusive
             }
         }
         
@@ -266,24 +274,27 @@ class SchemaValidator {
                 validConstrains = minimumConstraint <= intVar
                 
             }
+            if !validConstrains {
+                return validationResult(isValid: false, message: "minimumConstraint/exclusiveMim \(minimumConstraint) not passing to \(intVar).") //TODO: Separate maximum and maxExclusive
+            }
         }
         
         
-        //more int constraints
+        //TODO: more int constraints
         
-        return validConstrains
+        return validationResult(isValid: true, message: nil)
     }
     
-    func isValidArrayConstrains(val: AnyObject, schema:[String: AnyObject] ) -> Bool{
+    func isValidArrayConstrains(val: AnyObject, schema:[String: AnyObject] ) -> validationResult{
         
         guard val is Array<AnyObject> else {
             
-            return false
+            return validationResult(isValid: false, message: "Type not an array")
         }
         
         let arrayVar = val as! Array<AnyObject>
         
-        var validConstrains = true
+//        var validConstrains = true
         
         //5.3.1.  additionalItems and items
         if let additionalItems = schema["additionalItems"] as?  Bool {
@@ -291,14 +302,12 @@ class SchemaValidator {
             if !additionalItems {
                 
                 if let items = schema["items"] as? Array<AnyObject> {
-                    validConstrains = arrayVar.count <= items.count
-                } else{
-                    validConstrains = true
+                    let validConstrains = arrayVar.count <= items.count
+                    if !validConstrains {
+                        return validationResult(isValid: false, message: "additionalItems \(additionalItems) not passing to \(items.count) vs. \(arrayVar.count)")
+                    }
+                    
                 }
-                
-            }else{
-                
-                validConstrains = true
             }
             
         }
@@ -307,7 +316,10 @@ class SchemaValidator {
         if let maxItems = schema["maxItems"] as? Int {
             
             if maxItems > 0 { //5.3.2.1.  Valid values
-                validConstrains = arrayVar.count <= maxItems
+                let validConstrains = arrayVar.count <= maxItems
+                if !validConstrains {
+                    return validationResult(isValid: false, message: "maxItems \(maxItems) not passing to \(arrayVar.count)")
+                }
             }
         }
         
@@ -315,7 +327,10 @@ class SchemaValidator {
         if let minItems = schema["minItems"] as? Int {
             
             if minItems > 0 { //5.3.3.1.  Valid values
-                validConstrains = arrayVar.count >= minItems
+                let validConstrains = arrayVar.count >= minItems
+                if !validConstrains {
+                    return validationResult(isValid: false, message: "minItems \(minItems) not passing to \(arrayVar.count)")
+                }
             }
         }
         
@@ -327,7 +342,10 @@ class SchemaValidator {
                 if let anies = arrayVar as? Array<String> { //TODO: is this safe? what for other objects?
                     
                     let uniques = Set(anies)
-                    validConstrains = arrayVar.count == uniques.count
+                    let validConstrains = arrayVar.count == uniques.count
+                    if !validConstrains {
+                        return validationResult(isValid: false, message: "uniqueItems \(uniqueItems) not passing to \(anies) vs \(uniques)")
+                    }
                     
                 }
             }
@@ -335,17 +353,17 @@ class SchemaValidator {
         }
         
         
-        return validConstrains
+        return validationResult(isValid: true, message: nil)
     }
     
     
     func constraintsCompliance(value: AnyObject, schema: [String: AnyObject]) -> validationResult{
         
-        var validConstrains = true
+        var validConstrains : validationResult!
         
         guard let JSONtype = schema["type"] as? String else{
             
-            return validationResult(isValid:validConstrains, message: "Type attribute is mandatory]") //should throw an exception?
+            return validationResult(isValid:false, message: "Type attribute is mandatory]") //should throw an exception?
         }
         
         switch JSONtype {
@@ -358,11 +376,11 @@ class SchemaValidator {
             //    case "object":  [TODO: verify not needed]
         //        validConstrains = isValidObjectConstrains(value, schema: schema)
         default:
-            validConstrains = true
+            validConstrains = validationResult(isValid:true, message: nil)
         }
         
         //TODO: false results might get cleared later down for a positive result
-        return validationResult(isValid:validConstrains, message: "[TODO]")
+        return validConstrains
         
     }
 
