@@ -121,6 +121,21 @@ class SchemaValidator {
                     
                     if JSONObject[schemaPropertyKey] is Array<AnyObject>{
                         print("Soy un array \(schemaPropertyKey)")
+                        
+                        if let subJSONArray = JSONObject[schemaPropertyKey] as? Array<AnyObject> {
+                        
+                            if let subSchemaPayload = property.1 as? [String: AnyObject] {
+                                
+                                let result = constraintsCompliance(subJSONArray, schema: subSchemaPayload)
+                                
+                                if !result.isValid{
+                                    return result
+                                }
+                            
+                            }
+                        
+                        }
+                        
                     }
                     
                     
@@ -140,8 +155,37 @@ class SchemaValidator {
                         
                         
                     }
+                    
+                    if JSONObject[schemaPropertyKey] is String{
+                        print("Soy un string \(schemaPropertyKey)")
+                        
+                        if let subJSONString = JSONObject[schemaPropertyKey] as? String {
+                            if let subSchemaPayload = property.1 as? [String: AnyObject] {
+                                
+                                let result = constraintsCompliance(subJSONString, schema: subSchemaPayload)
+                                
+                                if !result.isValid{
+                                    return result
+                                }
+                            }
+                            
+                        }
+                        
+                    }
+                    
                     if JSONObject[schemaPropertyKey] is Int{
                         print("Soy un numero \(schemaPropertyKey)")
+                        if let subJSONInteger = JSONObject[schemaPropertyKey] as? Int {
+                            if let subSchemaPayload = property.1 as? [String: AnyObject] {
+                                
+                                let result = constraintsCompliance(subJSONInteger, schema: subSchemaPayload)
+                                
+                                if !result.isValid{
+                                    return result
+                                }
+                            }
+                            
+                        }
                     }
                     if JSONObject[schemaPropertyKey] is Bool{
                         print("Soy un Bool \(schemaPropertyKey)")

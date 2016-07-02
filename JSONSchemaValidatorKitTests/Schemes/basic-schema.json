@@ -41,6 +41,12 @@
             "minItems": 1,
             "uniqueItems":true,
         },
+        "bankAccounts":{
+            "description": "bank accounts",
+            "type": "array",
+            "items":[{},{}],
+            "additionalItems":false,
+        },
         "car":{
             "description": "family vehicle",
             "type": "object",
@@ -48,8 +54,8 @@
             "minProperties": 2,
             "required": ["brand","year"],
             "additionalProperties": false,
-            "properties":{  "brand":{},
-                "year":{}
+            "properties":{  "brand":{"type":"string"},
+                "year":{"type":"string"}
             },
             "patternProperties": {
                 "^col": {},

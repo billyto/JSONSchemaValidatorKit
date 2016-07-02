@@ -7,6 +7,7 @@
     "meals":6,
     "children":["bart","lisa","maggie"],
     "pets":["santas helper", "bryan"],
+    "bankAccounts":["Springfield Bank","Central Bank"],
     "car":{
         "brand":"tesla",
         "year":"2016",
