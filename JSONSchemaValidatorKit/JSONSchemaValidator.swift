@@ -110,6 +110,12 @@ class SchemaValidator {
             return propertiesPresence
         }
         
+        let propertiesDependecy = dependecyValidation(JSONObject, withSchema: schema)
+        if !propertiesDependecy.isValid {
+            return propertiesDependecy
+        }
+        
+        
         
         if let schemaProperties = schema["properties"] as? [String: AnyObject] {
             
@@ -243,10 +249,7 @@ class SchemaValidator {
         if let pattern = schema["pattern"] as? String {
             
             if stringVar.rangeOfString(pattern, options: .RegularExpressionSearch) == nil {
-                
-                if !validConstrains {
                     return validationResult(isValid: false, message: "Pattern \(pattern) not passing to \(stringVar).")
-                }
             }
             
         }
@@ -569,7 +572,7 @@ class SchemaValidator {
                     if s.contains(k) {
                         
                         
-                        let validConstrains = constraintsCompliance(JSONObject, schema: schemaDependecy)
+                        let validConstrains = constraintsCompliance(JSONObject[k]!, schema: schemaDependecy)
                         if !validConstrains.isValid {
                             
                             return validConstrains
