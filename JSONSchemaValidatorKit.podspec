@@ -2,7 +2,7 @@
 Pod::Spec.new do |s|
 
   s.name         = "JSONSchemaValidatorKit"
-  s.version      = "0.0.1"
+  s.version      = "0.0.2"
   s.summary      = "JSON Schema validator supports spec v4"
   s.description  = <<-DESC
 
@@ -16,7 +16,7 @@ Pod::Spec.new do |s|
   s.license      = "MIT"
   s.author             = { "Billy Tobon" => "billy.tobon@gmail.com" }
   s.social_media_url   = "http://twitter.com/Billyto"
-  s.source       = { :git => "https://github.com/billyto/JSONSchemaValidatorKit.git", :tag => "0.0.1" }
+  s.source       = { :git => "https://github.com/billyto/JSONSchemaValidatorKit.git", :tag => "0.0.2" }
   s.source_files  = "JSONSchemaValidatorKit/*.swift"
 
   s.ios.deployment_target = "8.0"
