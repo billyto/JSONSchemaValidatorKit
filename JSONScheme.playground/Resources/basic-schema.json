@@ -26,7 +26,7 @@
         "meals":{
             "description": "meals per day",
             "type": "integer",
-            "multipleOf": 0,
+            "multipleOf": 3,
         },
         "children":{
             "description": "kids",
@@ -41,24 +41,34 @@
             "minItems": 1,
             "uniqueItems":true,
         },
+        "bankAccounts":{
+            "description": "bank accounts",
+            "type": "array",
+            "items":[{},{}],
+            "additionalItems":false,
+        },
+        "OrganDonor":{
+            "description": "can give you a kidney?",
+            "type": "bool",
+        },
         "car":{
             "description": "family vehicle",
             "type": "object",
-            "maxProperties": 3,
+            "maxProperties": 4,
             "minProperties": 2,
             "required": ["brand","year"],
             "additionalProperties": false,
-            "properties":{  "brand":{},
-                            "year":{}
-                         },
+            "properties":{  "brand":{"type":"string"},
+                "year":{"type":"string"}
+            },
             "patternProperties": {
                 "^col": {},
                 "^mil": {"type": "integer",
-                         "multipleOf":100}
+                    "multipleOf":100}
             },
             "dependencies":{
                 "brand":["year","color"],
-                "miles":{"minimum":100, "maximum":1000},
+                "miles":{"type":"integer", "minimum":100, "maximum":1000},
             },
         }
         

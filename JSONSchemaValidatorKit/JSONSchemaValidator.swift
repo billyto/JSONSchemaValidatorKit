@@ -10,11 +10,23 @@ import Foundation
 
 typealias Payload = [String: AnyObject] //need?
 
-
-struct validationResult { //TODO: turn into enum?
+//likely not needed
+enum JSONDataType: String {
     
-    var isValid: Bool!
-    var message: String?
+    case JSONArray = "array"
+    case JSONObject = "object"
+    case JSONString = "string"
+    case JSONInteger = "integer"
+    case JSONNumber = "number"
+    case JSONBool = "bool"
+    
+}
+
+
+public struct validationResult { //TODO: turn into enum?
+    
+    public var isValid: Bool!
+    public var message: String?
     
 }
 
@@ -27,11 +39,11 @@ extension NSData {
     
 }
 
-class SchemaValidator {
+public class SchemaValidator {
 
     var schema: Payload!
     
-    init(withSchema schema:NSData) throws {
+    public init(withSchema schema:NSData) throws {
     
         do {
         
@@ -44,7 +56,7 @@ class SchemaValidator {
         }
     }
     
-    init(withSchema schema:[String: AnyObject]) {
+    public init(withSchema schema:[String: AnyObject]) {
     
         self.schema = schema
         //TODO: add optional validation against v4
@@ -52,14 +64,14 @@ class SchemaValidator {
     
 
     //Validate scheme against v4 spec
-    func isValidSchema() -> Bool {
+    public func isValidSchema() -> Bool {
     
         return true //TODO
     }
     
     
     
-    func validateJSON(JSONObject: NSData ) -> validationResult {
+    public func validateJSON(JSONObject: NSData ) -> validationResult {
         
         let validation : validationResult
         
@@ -76,7 +88,7 @@ class SchemaValidator {
     }
     
     
-    func validateJSON(JSONObject: [String: AnyObject] ) -> validationResult {
+    public func validateJSON(JSONObject: [String: AnyObject] ) -> validationResult {
     
          return validate(JSONObject, withSchema: self.schema)
         
