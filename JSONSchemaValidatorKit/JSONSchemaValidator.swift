@@ -8,17 +8,16 @@
 
 import Foundation
 
-typealias Payload = [String: AnyObject] //need?
+typealias Payload = [String: AnyObject]
 
-//likely not needed
-enum JSONDataType: String {
+public enum JSONDataType: String {
     
-    case JSONArray = "array"
-    case JSONObject = "object"
-    case JSONString = "string"
-    case JSONInteger = "integer"
-    case JSONNumber = "number"
-    case JSONBool = "bool"
+    case JSONArray      = "array"
+    case JSONObject     = "object"
+    case JSONString     = "string"
+    case JSONInteger    = "integer"
+    case JSONNumber     = "number"
+    case JSONBool       = "bool"
     
 }
 
@@ -420,22 +419,23 @@ public class SchemaValidator {
         
         var validConstrains : validationResult!
         
-        guard let JSONtype = schema["type"] as? String else{
+        guard let rawJSONtype = schema["type"] as? String else{
             
             return validationResult(isValid:false, message: "Type attribute is mandatory]") //should throw an exception?
         }
         
-        switch JSONtype {
-        case "string":
-            validConstrains = isValidStringConstrains(value, schema: schema)
-        case "integer":
-            validConstrains = isValidIntegerConstrains(value, schema: schema)
-        case "array":
-            validConstrains = isValidArrayConstrains(value, schema: schema)
-            //    case "object":  [TODO: verify not needed]
-        //        validConstrains = isValidObjectConstrains(value, schema: schema)
-        default:
-            validConstrains = validationResult(isValid:true, message: nil)
+        if let JSONType = JSONDataType(rawValue: rawJSONtype) {
+        
+            switch JSONType {
+            case .JSONString:
+                validConstrains = isValidStringConstrains(value, schema: schema)
+            case .JSONInteger:
+                validConstrains = isValidIntegerConstrains(value, schema: schema)
+            case .JSONArray:
+                validConstrains = isValidArrayConstrains(value, schema: schema)
+            default:
+                validConstrains = validationResult(isValid:true, message: nil)
+            }
         }
         
         //TODO: false results might get cleared later down for a positive result
