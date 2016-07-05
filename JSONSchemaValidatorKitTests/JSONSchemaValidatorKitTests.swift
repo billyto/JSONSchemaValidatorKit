@@ -62,6 +62,16 @@ class JSONSchemaValidatorKitTests: XCTestCase {
         
     }
     
+    func isValid(result: validationResult) -> Bool {
+    
+        switch result {
+        case .Failure(_):
+            return false
+        default:
+            return true
+        }
+    
+    }
     
     func testValidateBadJSON()  {
         XCTAssertNotNil(schema)
@@ -71,7 +81,7 @@ class JSONSchemaValidatorKitTests: XCTestCase {
             let validator  = try SchemaValidator(withSchema: schema!)
             
             let result : validationResult = validator.validateJSON(badData!)
-            XCTAssertFalse(result.isValid)
+            XCTAssertFalse(isValid(result))
             
         }catch {
             
@@ -87,11 +97,8 @@ class JSONSchemaValidatorKitTests: XCTestCase {
         
         do {
             let validator  = try SchemaValidator(withSchema: schema!)
-            
             let result : validationResult = validator.validateJSON(person!)
-            print("*** \(result.message)")
-            
-            XCTAssertTrue(result.isValid)
+            XCTAssertTrue(isValid(result))
         }catch {
         
             XCTFail()

@@ -17,7 +17,7 @@ let jsonSchema = try NSJSONSerialization.JSONObjectWithData(jsonXData!, options:
     
 let validator : SchemaValidator?  = try SchemaValidator(withSchema: jsonSchema!)
 let result = validator!.validateJSON(jsonDocument!)
-print("do we have a valid json? \(result.isValid)")
+print("do we have a valid json? \(result)")
 
     
 
