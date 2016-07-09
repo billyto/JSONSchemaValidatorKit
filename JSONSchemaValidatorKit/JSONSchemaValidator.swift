@@ -582,7 +582,7 @@ public class SchemaValidator {
     //TODO: 5.5.  Validation keywords for any instance type
     
     //5.5.1.  enum
-    func enumValidation<T where T: Comparable>(val: T, withSchema schema:[String: AnyObject]) -> validationResult {
+    func enumValidation<T where T: Equatable>(val: T, withSchema schema:[String: AnyObject]) -> validationResult {
     
         if let enumArray = schema["enum"] as? Array<T> {
         
