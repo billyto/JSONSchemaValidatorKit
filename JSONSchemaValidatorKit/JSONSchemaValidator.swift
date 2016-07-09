@@ -262,12 +262,12 @@ public class SchemaValidator {
     }
     
     
-    func isValidIntegerConstrains(val: Int, schema:[String: AnyObject] ) -> validationResult{
+    func isValidNumberConstrains(val: Double, schema:[String: AnyObject] ) -> validationResult{
         
         var validConstrains = true
         
         //5.1.1.  multipleOf
-        if let multipleOf = schema["multipleOf"] as? Int {
+        if let multipleOf = schema["multipleOf"] as? Double {
             
             if multipleOf > 0 { //5.1.1.1.  Valid values
                 validConstrains = (val %  multipleOf) == 0
@@ -279,7 +279,7 @@ public class SchemaValidator {
         
         
         //5.1.2.  maximum and exclusiveMaximum
-        if let maximumConstraint = schema["maximum"] as? Int {
+        if let maximumConstraint = schema["maximum"] as? Double {
             
             if let exclusiveMax = schema["exclusiveMaximum"] as? Bool {
                 
@@ -302,7 +302,7 @@ public class SchemaValidator {
         
         
         //5.1.3. minimum and exclusiveMinimum
-        if let minimumConstraint = schema["minimum"] as? Int {
+        if let minimumConstraint = schema["minimum"] as? Double {
             
             if let exclusiveMin = schema["exclusiveMinimum"] as? Bool {
                 
@@ -413,13 +413,14 @@ public class SchemaValidator {
                     return .Failure("\(value) is not a String")
                 }
             case .JSONInteger, .JSONNumber:
-                if let integerValue = value as? Int {
-                    validConstrains = enumValidation(integerValue, withSchema: schema)
-                    validConstrains = isValidIntegerConstrains(integerValue, schema: schema)
+                if let doubleValue = value as? Double {
+                    validConstrains = enumValidation(doubleValue, withSchema: schema)
+                    validConstrains = isValidNumberConstrains(doubleValue, schema: schema)
                 } else {
                     return .Failure("\(value) is not a Number")
                 }
             case .JSONArray:
+                    //TODO: enum validation?
                 validConstrains = isValidArrayConstrains(value, schema: schema)
             case .JSONBoolean:
                 if (value is Bool) {
@@ -431,7 +432,7 @@ public class SchemaValidator {
                 validConstrains = .Success
             }
         
-        //TODO: generic constraints
+    
         }
         return validConstrains
     }
@@ -579,7 +580,6 @@ public class SchemaValidator {
         return .Success
     }
     
-    //TODO: 5.5.  Validation keywords for any instance type
     
     //5.5.1.  enum
     func enumValidation<T where T: Equatable>(val: T, withSchema schema:[String: AnyObject]) -> validationResult {
@@ -599,8 +599,14 @@ public class SchemaValidator {
         } else {
             return .Success
         }
-    
     }
+    
+    //MARK: Combining schemas
+    
+    //5.5.3.  allOf
+    //5.5.4.  anyOf
+    //5.5.5.  oneOf
+    //5.5.6.  not
     
 }
 

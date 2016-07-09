@@ -28,6 +28,10 @@
             "type": "string",
             "enum": ["Marvel","DC"],
         },
+        "gpa":{
+            "description": "college gpa",
+            "type": "number",
+        },
         "meals":{
             "description": "meals per day",
             "type": "integer",

@@ -6,6 +6,7 @@
     "slicesOfPizza": 3,
     "hoursOfSleep": 5,
     "meals":6,
+    "gpa":3.14,
     "children":["bart","lisa","maggie"],
     "pets":["santas helper", "bryan"],
     "bankAccounts":["Springfield Bank","Central Bank"],
