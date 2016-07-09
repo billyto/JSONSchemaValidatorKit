@@ -23,6 +23,11 @@
             "maximum": 4,
             "exclusiveMaximum": true,
         },
+        "FavUniverse":{
+            "description": "Favorite fictional universe",
+            "type": "string",
+            "enum": ["Marvel","DC"],
+        },
         "meals":{
             "description": "meals per day",
             "type": "integer",
@@ -49,7 +54,7 @@
         },
         "OrganDonor":{
             "description": "can give you a kidney?",
-            "type": "bool",
+            "type": "boolean",
         },
         "car":{
             "description": "family vehicle",

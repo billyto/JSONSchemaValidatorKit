@@ -1,6 +1,7 @@
 {
     "firstName":"Peter",
     "lastName":"Griffin",
+    "FavUniverse":"Marvel",
     "age":11,
     "slicesOfPizza": 3,
     "hoursOfSleep": 5,
