@@ -60,6 +60,15 @@
             "description": "can give you a kidney?",
             "type": "boolean",
         },
+        "emergencyContact":{
+            "description": "Dog to call in case of emergency",
+            "type": "string",
+            "allOf": [
+                      {  "minLength": 2},
+                      { "maxLength": 10 }
+                      ]
+
+        },
         "car":{
             "description": "family vehicle",
             "type": "object",

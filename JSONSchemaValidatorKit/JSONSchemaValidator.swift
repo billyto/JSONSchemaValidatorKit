@@ -333,8 +333,6 @@ public class SchemaValidator {
         
         let arrayVar = val as! Array<AnyObject>
         
-//        var validConstrains = true
-        
         //5.3.1.  additionalItems and items
         if let additionalItems = schema["additionalItems"] as?  Bool {
             
@@ -414,6 +412,7 @@ public class SchemaValidator {
                 }
             case .JSONInteger, .JSONNumber:
                 if let doubleValue = value as? Double {
+                    
                     validConstrains = enumValidation(doubleValue, withSchema: schema)
                     validConstrains = isValidNumberConstrains(doubleValue, schema: schema)
                 } else {
@@ -540,7 +539,7 @@ public class SchemaValidator {
         
     }
     
-    //5.4.5. dependencies
+    //MARK: 5.4.5. dependencies
     func dependecyValidation(JSONObject: [String: AnyObject], withSchema schema:[String: AnyObject]) -> validationResult {
         
         
@@ -581,7 +580,7 @@ public class SchemaValidator {
     }
     
     
-    //5.5.1.  enum
+    //MARK: 5.5.1.  enum
     func enumValidation<T where T: Equatable>(val: T, withSchema schema:[String: AnyObject]) -> validationResult {
     
         if let enumArray = schema["enum"] as? Array<T> {
@@ -603,10 +602,105 @@ public class SchemaValidator {
     
     //MARK: Combining schemas
     
-    //5.5.3.  allOf
-    //5.5.4.  anyOf
-    //5.5.5.  oneOf
-    //5.5.6.  not
+    //TODO: Type can be a subschema
+    
+    //MARK: 5.5.3.  allOf
+    func allOfValidation(JSONObject: [String: AnyObject], withSchema schema:[String: AnyObject]) -> validationResult {
+    
+        if let combinedSchemas = schema["allOf"] as? Array<AnyObject> {
+        
+            for schm in combinedSchemas {
+                
+                if let subSchema = schm as? [String:AnyObject] {
+                    
+                    let result = validate(JSONObject, withSchema: subSchema)
+                    switch result {
+                    case .Success:
+                        continue
+                    case .Failure(_):
+                        return result
+                    }
+                }
+            }
+        }
+        return .Success
+    }
+    
+    //MARK: 5.5.4.  anyOf
+    func anyOfValidation(JSONObject: [String: AnyObject], withSchema schema:[String: AnyObject]) -> validationResult {
+        
+        if let combinedSchemas = schema["anyOf"] as? Array<AnyObject> {
+            
+            for schm in combinedSchemas {
+                
+                if let subSchema = schm as? [String:AnyObject] {
+                    
+                    let result = validate(JSONObject, withSchema: subSchema)
+                    switch result {
+                    case .Success:
+                         return result
+                    case .Failure(_):
+                        continue
+                    }
+                }
+            }
+            return .Failure("\(JSONObject) not validated against any of \(schema)")
+        }
+        return .Success
+    }
+    
+    
+    //MARK: 5.5.5.  oneOf
+    func oneOfValidation(JSONObject: [String: AnyObject], withSchema schema:[String: AnyObject]) -> validationResult {
+        
+        if let combinedSchemas = schema["oneOf"] as? Array<AnyObject> {
+            
+            var validSchemas = Array<validationResult>()
+            
+            for schm in combinedSchemas {
+                
+                if let subSchema = schm as? [String:AnyObject] {
+                    
+                    let result = validate(JSONObject, withSchema: subSchema)
+                    switch result {
+                    case .Success:
+                        validSchemas.append(result)
+                    case .Failure(_):
+                        continue
+                    }
+                }
+            }
+            
+            switch validSchemas.count {
+            case 0:
+                return .Failure("\(JSONObject) not validated against any of \(schema)")
+            case 1:
+                return .Success
+            default:
+                return .Failure("\(JSONObject) validated against multiple of \(schema). Only one expected")
+            }
+        }
+        return .Success
+    }
+    
+    
+    //MARK: 5.5.6.  not
+    func notValidation(JSONObject: [String: AnyObject], withSchema schema:[String: AnyObject]) -> validationResult {
+    
+        if let notSchema = schema["not"] as? [String: AnyObject] {
+        
+            let result = validate(JSONObject, withSchema: notSchema)
+            switch result {
+            case .Success :
+                return .Failure("\(JSONObject) is valid against the schema \(notSchema), it should not validate")
+            case .Failure(_):
+                return .Success
+            }
+        }
+        return .Success
+        
+    }
+
     
 }
 
