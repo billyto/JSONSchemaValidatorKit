@@ -8,7 +8,9 @@
 
 import Foundation
 
-typealias Payload = [String: AnyObject]
+public typealias JSONObject =  [String: AnyObject]
+public typealias JSONSchema =  [String: AnyObject]
+public typealias JSONArray  =  [AnyObject]
 
 public enum JSONDataType: String {
     
@@ -40,13 +42,13 @@ extension NSData {
 
 public class SchemaValidator {
 
-    var schema: Payload!
+    var schema: JSONSchema!
     
     public init(withSchema schema:NSData) throws {
     
         do {
         
-            self.schema = try NSJSONSerialization.JSONObjectWithData(schema, options: NSJSONReadingOptions()) as? Payload
+            self.schema = try NSJSONSerialization.JSONObjectWithData(schema, options: NSJSONReadingOptions()) as? JSONSchema
             //TODO: add optional validation against v4
             
         } catch {
@@ -55,7 +57,7 @@ public class SchemaValidator {
         }
     }
     
-    public init(withSchema schema:[String: AnyObject]) {
+    public init(withSchema schema:JSONSchema) {
     
         self.schema = schema
         //TODO: add optional validation against v4
@@ -70,14 +72,14 @@ public class SchemaValidator {
     
     
     
-    public func validateJSON(JSONObject: NSData ) -> validationResult {
+    public func validateJSON(data: NSData ) -> validationResult {
         
         let validation : validationResult
         
         do {
             
-            let JSONObject: Payload = try NSJSONSerialization.JSONObjectWithData(JSONObject, options: NSJSONReadingOptions()) as! Payload
-            validation = validateJSON(JSONObject)
+            let JSONContent = try NSJSONSerialization.JSONObjectWithData(data, options: NSJSONReadingOptions())
+            validation = validateJSON(JSONContent)
             
         } catch {
             validation =  .Failure("serialization issue: \(error)")
@@ -86,10 +88,36 @@ public class SchemaValidator {
         return validation;
     }
     
+    public func validateJSON(content: AnyObject) -> validationResult {
     
-    public func validateJSON(JSONObject: [String: AnyObject] ) -> validationResult {
+        var validation : validationResult = .Success
+
+        if let jsonObject = content as? JSONObject {
+            
+            validation = validateJSON(jsonObject)
+            
+        } else if let jsonArray = content as? JSONArray {
+            
+            for jsonContent  in jsonArray {
+                
+                validation = validateJSON(jsonContent)
+                
+                switch validation {
+                case .Failure(_):
+                    return validation
+                default:
+                    continue
+                }
+            }
+        }
+        
+        return validation
     
-         return validate(JSONObject, withSchema: self.schema)
+    }
+    
+    public func validateJSON(jsonObject: JSONObject ) -> validationResult {
+    
+         return validate(jsonObject, withSchema: self.schema)
         
     
     }
@@ -98,12 +126,12 @@ public class SchemaValidator {
     //private functions now:
 
     //this is validate ObjectType (5.4)
-    func validate(JSONObject: [String: AnyObject], withSchema schema:[String: AnyObject]) -> validationResult{
+    func validate(jsonObject: JSONObject, withSchema schema:JSONSchema) -> validationResult{
         
         //TODO: validate Type attribute constrain
         
         //TODO: same signature and response handling? maybe a map? using a funct type for xxxValidation
-        let minProperties = minPropertiesValidation(JSONObject, withSchema:schema)
+        let minProperties = minPropertiesValidation(jsonObject, withSchema:schema)
         
         switch minProperties {
         case .Failure(_):
@@ -112,48 +140,48 @@ public class SchemaValidator {
         }
         
         
-        let maxProperties = maxPropertiesValidation(JSONObject, withSchema:schema)
+        let maxProperties = maxPropertiesValidation(jsonObject, withSchema:schema)
         switch maxProperties {
         case .Failure(_):
             return maxProperties
         default: break
         }
         
-        let required = requiredPropertiesValidation(JSONObject, withSchema:schema)
+        let required = requiredPropertiesValidation(jsonObject, withSchema:schema)
         switch required {
         case .Failure(_):
             return required
         default: break
         }
         
-        let propertiesPresence = propertiesPresenceValidation(JSONObject, withSchema:schema)
+        let propertiesPresence = propertiesPresenceValidation(jsonObject, withSchema:schema)
         switch propertiesPresence {
         case .Failure(_):
             return propertiesPresence
         default: break
         }
         
-        let propertiesDependecy = dependecyValidation(JSONObject, withSchema: schema)
+        let propertiesDependecy = dependecyValidation(jsonObject, withSchema: schema)
         switch propertiesDependecy {
         case .Failure(_):
             return propertiesDependecy
         default: break
         }
         
-        if let schemaProperties = schema["properties"] as? [String: AnyObject] {
+        if let schemaProperties = schema["properties"] as? JSONSchema {
             
             for property in schemaProperties {
                 
                 let schemaPropertyKey = property.0
                 
-                if JSONObject[schemaPropertyKey] != nil { // TODO validate by type
+                if jsonObject[schemaPropertyKey] != nil { // TODO validate by type
                     
-                    if JSONObject[schemaPropertyKey] is Array<AnyObject>{
+                    if jsonObject[schemaPropertyKey] is JSONArray {
                         print("Soy un array \(schemaPropertyKey)")
                         
-                        if let subJSONArray = JSONObject[schemaPropertyKey] as? Array<AnyObject> {
+                        if let subJSONArray = jsonObject[schemaPropertyKey] as? JSONArray {
                         
-                            if let subSchemaPayload = property.1 as? [String: AnyObject] {
+                            if let subSchemaPayload = property.1 as? JSONSchema {
                                 
                                 let result = constraintsCompliance(subJSONArray, schema: subSchemaPayload)
                                 switch result {
@@ -166,12 +194,12 @@ public class SchemaValidator {
                     }
                     
                     
-                    if JSONObject[schemaPropertyKey] is [String:AnyObject]{
+                    if jsonObject[schemaPropertyKey] is [String:AnyObject]{
                         
                         print("Soy un objeto \(schemaPropertyKey)")
-                        if let subJSONObject = JSONObject[schemaPropertyKey] as? [String:AnyObject]{
+                        if let subJSONObject = jsonObject[schemaPropertyKey] as? [String:AnyObject]{
 
-                            let result = validate(subJSONObject, withSchema: property.1 as! [String : AnyObject]  )
+                            let result = validate(subJSONObject, withSchema: property.1 as! JSONSchema  )
                             switch result {
                             case .Failure(_):
                                 return result
@@ -180,9 +208,9 @@ public class SchemaValidator {
                         }
                     }
                     
-                    if JSONObject[schemaPropertyKey] is String{
-                        if let subJSONString = JSONObject[schemaPropertyKey] as? String {
-                            if let subSchemaPayload = property.1 as? [String: AnyObject] {
+                    if jsonObject[schemaPropertyKey] is String{
+                        if let subJSONString = jsonObject[schemaPropertyKey] as? String {
+                            if let subSchemaPayload = property.1 as? JSONSchema {
                                 
                                 let result = constraintsCompliance(subJSONString, schema: subSchemaPayload)
                                 switch result {
@@ -194,10 +222,10 @@ public class SchemaValidator {
                         }
                     }
                     
-                    if JSONObject[schemaPropertyKey] is Int{
+                    if jsonObject[schemaPropertyKey] is Int{
                         print("Soy un numero \(schemaPropertyKey)")
-                        if let subJSONInteger = JSONObject[schemaPropertyKey] as? Int {
-                            if let subSchemaPayload = property.1 as? [String: AnyObject] {
+                        if let subJSONInteger = jsonObject[schemaPropertyKey] as? Int {
+                            if let subSchemaPayload = property.1 as? JSONSchema {
                                 
                                 let result = constraintsCompliance(subJSONInteger, schema: subSchemaPayload)
                                 switch result {
@@ -209,7 +237,7 @@ public class SchemaValidator {
                             
                         }
                     }
-                    if JSONObject[schemaPropertyKey] is Bool{
+                    if jsonObject[schemaPropertyKey] is Bool{
                         print("Soy un Bool \(schemaPropertyKey)")
                     }
                     
@@ -223,7 +251,7 @@ public class SchemaValidator {
     }
     
     
-    func isValidStringConstrains(val: String, schema:[String: AnyObject] ) -> validationResult{
+    func isValidStringConstrains(val: String, schema:JSONSchema ) -> validationResult{
         
         var validConstrains = true
         
@@ -262,7 +290,7 @@ public class SchemaValidator {
     }
     
     
-    func isValidNumberConstrains(val: Double, schema:[String: AnyObject] ) -> validationResult{
+    func isValidNumberConstrains(val: Double, schema:JSONSchema ) -> validationResult{
         
         var validConstrains = true
         
@@ -324,7 +352,7 @@ public class SchemaValidator {
         return .Success
     }
     
-    func isValidArrayConstrains(val: AnyObject, schema:[String: AnyObject] ) -> validationResult{
+    func isValidArrayConstrains(val: AnyObject, schema:JSONSchema ) -> validationResult{
         
         guard val is Array<AnyObject> else {
             
@@ -338,7 +366,7 @@ public class SchemaValidator {
             
             if !additionalItems {
                 
-                if let items = schema["items"] as? Array<AnyObject> {
+                if let items = schema["items"] as? JSONArray {
                     let validConstrains = arrayVar.count <= items.count
                     if !validConstrains {
                         return .Failure("additionalItems \(additionalItems) not passing to \(items.count) vs. \(arrayVar.count)")
@@ -391,7 +419,7 @@ public class SchemaValidator {
     }
     
     
-    func constraintsCompliance(value: AnyObject, schema: [String: AnyObject]) -> validationResult{
+    func constraintsCompliance(value: AnyObject, schema: JSONSchema) -> validationResult{
         
         var validConstrains : validationResult!
         
@@ -437,13 +465,13 @@ public class SchemaValidator {
     }
 
     //5.4.1.  maxProperties
-    func maxPropertiesValidation(JSONObject: [String: AnyObject], withSchema schema:[String: AnyObject]) -> validationResult {
+    func maxPropertiesValidation(jsonObject: JSONObject, withSchema schema:JSONSchema) -> validationResult {
         
         if let maxProperties = schema["maxProperties"] as? Int {
             
             if maxProperties >= 0 { //5.4.1.1.  Valid values
                 
-                let propertiesCount = JSONObject.keys.count
+                let propertiesCount = jsonObject.keys.count
                 
                 if  !(propertiesCount <= maxProperties) {
                     
@@ -456,13 +484,13 @@ public class SchemaValidator {
     }
     
     //5.4.2.  minProperties
-    func minPropertiesValidation(JSONObject: [String: AnyObject], withSchema schema:[String: AnyObject]) -> validationResult {
+    func minPropertiesValidation(jsonObject: JSONObject, withSchema schema:JSONSchema) -> validationResult {
         
         if let minProperties = schema["minProperties"] as? Int {
             
             if minProperties >= 0 { //5.4.2.1.  Valid values
                 
-                let propertiesCount = JSONObject.keys.count
+                let propertiesCount = jsonObject.keys.count
                 
                 if  !(propertiesCount >= minProperties) {
                     
@@ -475,12 +503,12 @@ public class SchemaValidator {
     }
     
     //5.4.3.  required
-    func requiredPropertiesValidation(JSONObject: [String: AnyObject], withSchema schema:[String: AnyObject]) -> validationResult {
+    func requiredPropertiesValidation(jsonObject: JSONObject, withSchema schema:JSONSchema) -> validationResult {
         
         if let requiredProperties = schema["required"] as? Array<String> {
             
             let requiredPropertiesSet = Set(requiredProperties)
-            let schemaPropertiesSet = Set(JSONObject.keys)
+            let schemaPropertiesSet = Set(jsonObject.keys)
             
             let missingRequired = requiredPropertiesSet.subtract(schemaPropertiesSet)
             
@@ -497,15 +525,15 @@ public class SchemaValidator {
     }
     
     //5.4.4. additionalProperties, properties and patternProperties
-    func propertiesPresenceValidation(JSONObject: [String: AnyObject], withSchema schema:[String: AnyObject]) -> validationResult {
+    func propertiesPresenceValidation(jsonObject: JSONObject, withSchema schema:JSONSchema) -> validationResult {
         
         
         if  schema["additionalProperties"] is Bool {
             
             if schema["additionalProperties"] as! Bool == false {
                 
-                let s = Array(JSONObject.keys)
-                if let p = schema["properties"] as? [String: AnyObject] {
+                let s = Array(jsonObject.keys)
+                if let p = schema["properties"] as? JSONSchema {
                     
                     var sSansP = s.filter{ //take all the declared properties
                         !p.keys.contains($0)
@@ -514,7 +542,7 @@ public class SchemaValidator {
                     
                     if sSansP.count > 0 { // still elements
                         
-                        if let pp = schema["patternProperties"] as? [String: AnyObject]  {
+                        if let pp = schema["patternProperties"] as? JSONSchema {
                             
                             for regex in pp.keys {
                                 
@@ -540,16 +568,16 @@ public class SchemaValidator {
     }
     
     //MARK: 5.4.5. dependencies
-    func dependecyValidation(JSONObject: [String: AnyObject], withSchema schema:[String: AnyObject]) -> validationResult {
+    func dependecyValidation(jsonObject: JSONObject, withSchema schema:JSONSchema) -> validationResult {
         
         
-        if let dependencies = schema["dependencies"] as? [String: AnyObject] {
+        if let dependencies = schema["dependencies"] as? JSONSchema {
             
             for (k,v) in dependencies {
                 
                 if let propertyDepencies = v as? Array<String> { //Property dependency
                     print (propertyDepencies)
-                    let s = Set(JSONObject.keys)
+                    let s = Set(jsonObject.keys)
                     let dependeciesSet = Set(propertyDepencies)
                     
                     if s.contains(k) && !dependeciesSet.isSubsetOf(s)  {
@@ -557,15 +585,15 @@ public class SchemaValidator {
                         return .Failure("Dependency \(k) not found")
                         
                     }
-                } else if let schemaDependecy = v as? [String: AnyObject]  {  // Schema dependency
+                } else if let schemaDependecy = v as? JSONSchema  {  // Schema dependency
                     
                     print("schema? \(schemaDependecy)")
                     
-                    let s = Array(JSONObject.keys)
+                    let s = Array(jsonObject.keys)
                     if s.contains(k) {
                         
                         
-                        let validConstrains = constraintsCompliance(JSONObject[k]!, schema: schemaDependecy)
+                        let validConstrains = constraintsCompliance(jsonObject[k]!, schema: schemaDependecy)
                         switch validConstrains {
                         case .Failure(_):
                             return validConstrains
@@ -581,7 +609,7 @@ public class SchemaValidator {
     
     
     //MARK: 5.5.1.  enum
-    func enumValidation<T where T: Equatable>(val: T, withSchema schema:[String: AnyObject]) -> validationResult {
+    func enumValidation<T where T: Equatable>(val: T, withSchema schema:JSONSchema) -> validationResult {
     
         if let enumArray = schema["enum"] as? Array<T> {
         
@@ -605,15 +633,15 @@ public class SchemaValidator {
     //TODO: Type can be a subschema
     
     //MARK: 5.5.3.  allOf
-    func allOfValidation(JSONObject: [String: AnyObject], withSchema schema:[String: AnyObject]) -> validationResult {
+    func allOfValidation(jsonObject: JSONObject, withSchema schema:JSONSchema) -> validationResult {
     
-        if let combinedSchemas = schema["allOf"] as? Array<AnyObject> {
+        if let combinedSchemas = schema["allOf"] as? JSONArray {
         
             for schm in combinedSchemas {
                 
-                if let subSchema = schm as? [String:AnyObject] {
+                if let subSchema = schm as? JSONSchema {
                     
-                    let result = validate(JSONObject, withSchema: subSchema)
+                    let result = validate(jsonObject, withSchema: subSchema)
                     switch result {
                     case .Success:
                         continue
@@ -627,15 +655,15 @@ public class SchemaValidator {
     }
     
     //MARK: 5.5.4.  anyOf
-    func anyOfValidation(JSONObject: [String: AnyObject], withSchema schema:[String: AnyObject]) -> validationResult {
+    func anyOfValidation(jsonObject: JSONObject, withSchema schema:JSONSchema) -> validationResult {
         
-        if let combinedSchemas = schema["anyOf"] as? Array<AnyObject> {
+        if let combinedSchemas = schema["anyOf"] as? JSONArray {
             
             for schm in combinedSchemas {
                 
-                if let subSchema = schm as? [String:AnyObject] {
+                if let subSchema = schm as? JSONSchema {
                     
-                    let result = validate(JSONObject, withSchema: subSchema)
+                    let result = validate(jsonObject, withSchema: subSchema)
                     switch result {
                     case .Success:
                          return result
@@ -644,24 +672,24 @@ public class SchemaValidator {
                     }
                 }
             }
-            return .Failure("\(JSONObject) not validated against any of \(schema)")
+            return .Failure("\(jsonObject) not validated against any of \(schema)")
         }
         return .Success
     }
     
     
     //MARK: 5.5.5.  oneOf
-    func oneOfValidation(JSONObject: [String: AnyObject], withSchema schema:[String: AnyObject]) -> validationResult {
+    func oneOfValidation(jsonObject: JSONObject, withSchema schema:JSONSchema) -> validationResult {
         
-        if let combinedSchemas = schema["oneOf"] as? Array<AnyObject> {
+        if let combinedSchemas = schema["oneOf"] as? JSONArray {
             
             var validSchemas = Array<validationResult>()
             
             for schm in combinedSchemas {
                 
-                if let subSchema = schm as? [String:AnyObject] {
+                if let subSchema = schm as? JSONSchema {
                     
-                    let result = validate(JSONObject, withSchema: subSchema)
+                    let result = validate(jsonObject, withSchema: subSchema)
                     switch result {
                     case .Success:
                         validSchemas.append(result)
@@ -673,11 +701,11 @@ public class SchemaValidator {
             
             switch validSchemas.count {
             case 0:
-                return .Failure("\(JSONObject) not validated against any of \(schema)")
+                return .Failure("\(jsonObject) not validated against any of \(schema)")
             case 1:
                 return .Success
             default:
-                return .Failure("\(JSONObject) validated against multiple of \(schema). Only one expected")
+                return .Failure("\(jsonObject) validated against multiple of \(schema). Only one expected")
             }
         }
         return .Success
@@ -685,14 +713,14 @@ public class SchemaValidator {
     
     
     //MARK: 5.5.6.  not
-    func notValidation(JSONObject: [String: AnyObject], withSchema schema:[String: AnyObject]) -> validationResult {
+    func notValidation(jsonObject: JSONObject, withSchema schema:JSONSchema) -> validationResult {
     
-        if let notSchema = schema["not"] as? [String: AnyObject] {
+        if let notSchema = schema["not"] as? JSONSchema {
         
-            let result = validate(JSONObject, withSchema: notSchema)
+            let result = validate(jsonObject, withSchema: notSchema)
             switch result {
             case .Success :
-                return .Failure("\(JSONObject) is valid against the schema \(notSchema), it should not validate")
+                return .Failure("\(jsonObject) is valid against the schema \(notSchema), it should not validate")
             case .Failure(_):
                 return .Success
             }
