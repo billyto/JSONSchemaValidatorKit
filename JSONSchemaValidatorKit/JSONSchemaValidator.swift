@@ -123,9 +123,10 @@ public class SchemaValidator {
     }
 
         
-    //private functions now:
+    //private functions :
 
-    //this is validate ObjectType (5.4)
+    //MARK: Validation keywords for objects
+    //also entry point for validations
     func validate(jsonObject: JSONObject, withSchema schema:JSONSchema) -> validationResult{
         
         //TODO: validate Type attribute constrain
@@ -255,7 +256,7 @@ public class SchemaValidator {
         
         var validConstrains = true
         
-        // 5.2.1 maxLength
+        //MARK: 5.2.1. maxLength
         if let maxLength = schema["maxLength"] as? Int {
             
             if maxLength > 0 { //5.2.1.1.  Valid values
@@ -266,7 +267,7 @@ public class SchemaValidator {
             }
         }
         
-        // 5.2.2.  minLength
+        //MARK: 5.2.2.  minLength
         if let minLength = schema["minLength"] as? Int {
             
             if minLength > 0 { //5.2.2.1.  Valid values
@@ -277,7 +278,7 @@ public class SchemaValidator {
             }
         }
         
-        //5.2.3.  pattern
+        //MARK: 5.2.3.  pattern
         if let pattern = schema["pattern"] as? String {
             
             if val.rangeOfString(pattern, options: .RegularExpressionSearch) == nil {
@@ -294,7 +295,7 @@ public class SchemaValidator {
         
         var validConstrains = true
         
-        //5.1.1.  multipleOf
+        //MARK: 5.1.1.  multipleOf
         if let multipleOf = schema["multipleOf"] as? Double {
             
             if multipleOf > 0 { //5.1.1.1.  Valid values
@@ -306,7 +307,7 @@ public class SchemaValidator {
         }
         
         
-        //5.1.2.  maximum and exclusiveMaximum
+        //MARK: 5.1.2.  maximum and exclusiveMaximum
         if let maximumConstraint = schema["maximum"] as? Double {
             
             if let exclusiveMax = schema["exclusiveMaximum"] as? Bool {
@@ -329,7 +330,7 @@ public class SchemaValidator {
         
         
         
-        //5.1.3. minimum and exclusiveMinimum
+        //MARK: 5.1.3. minimum and exclusiveMinimum
         if let minimumConstraint = schema["minimum"] as? Double {
             
             if let exclusiveMin = schema["exclusiveMinimum"] as? Bool {
@@ -361,7 +362,7 @@ public class SchemaValidator {
         
         let arrayVar = val as! Array<AnyObject>
         
-        //5.3.1.  additionalItems and items
+        //MARK: 5.3.1.  additionalItems and items
         if let additionalItems = schema["additionalItems"] as?  Bool {
             
             if !additionalItems {
@@ -377,7 +378,7 @@ public class SchemaValidator {
             
         }
         
-        //5.3.2.  maxItems
+        //MARK: 5.3.2.  maxItems
         if let maxItems = schema["maxItems"] as? Int {
             
             if maxItems > 0 { //5.3.2.1.  Valid values
@@ -388,7 +389,7 @@ public class SchemaValidator {
             }
         }
         
-        //5.3.3.  minItems
+        //MARK: 5.3.3.  minItems
         if let minItems = schema["minItems"] as? Int {
             
             if minItems > 0 { //5.3.3.1.  Valid values
@@ -399,7 +400,7 @@ public class SchemaValidator {
             }
         }
         
-        //5.3.4.  uniqueItems
+        //MARK: 5.3.4.  uniqueItems
         if let uniqueItems = schema["uniqueItems"] as? Bool {
             
             if uniqueItems {
@@ -464,7 +465,7 @@ public class SchemaValidator {
         return validConstrains
     }
 
-    //5.4.1.  maxProperties
+    //MARK: 5.4.1.  maxProperties
     func maxPropertiesValidation(jsonObject: JSONObject, withSchema schema:JSONSchema) -> validationResult {
         
         if let maxProperties = schema["maxProperties"] as? Int {
@@ -483,7 +484,7 @@ public class SchemaValidator {
         return .Success
     }
     
-    //5.4.2.  minProperties
+    //MARK: 5.4.2.  minProperties
     func minPropertiesValidation(jsonObject: JSONObject, withSchema schema:JSONSchema) -> validationResult {
         
         if let minProperties = schema["minProperties"] as? Int {
@@ -502,7 +503,7 @@ public class SchemaValidator {
         return .Success
     }
     
-    //5.4.3.  required
+    //MARK: 5.4.3.  required
     func requiredPropertiesValidation(jsonObject: JSONObject, withSchema schema:JSONSchema) -> validationResult {
         
         if let requiredProperties = schema["required"] as? Array<String> {
@@ -524,7 +525,7 @@ public class SchemaValidator {
         
     }
     
-    //5.4.4. additionalProperties, properties and patternProperties
+    //MARK: 5.4.4. additionalProperties, properties and patternProperties
     func propertiesPresenceValidation(jsonObject: JSONObject, withSchema schema:JSONSchema) -> validationResult {
         
         
