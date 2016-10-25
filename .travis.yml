@@ -4,5 +4,5 @@ language: objective-c
 osx_image: xcode7.3
 #xcode_sdk: iphonesimulator9.3
 script:
-    - xcodebuild clean build -project JSONSchemaValidator.xcodeproj -scheme JSONSchemaValidatorKit CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO ONLY_ACTIVE_ARCH=NO
-    - xcodebuild clean test -project JSONSchemaValidator.xcodeproj -scheme Unbox-iOS -destination "platform=iOS Simulator,name=iPhone 6" CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO ONLY_ACTIVE_ARCH=NO
+    - xcodebuild clean build -project JSONSchemaValidatorKit.xcodeproj -scheme JSONSchemaValidatorKit CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO ONLY_ACTIVE_ARCH=NO
+    - xcodebuild clean test -project JSONSchemaValidatorKit.xcodeproj -scheme Unbox-iOS -destination "platform=iOS Simulator,name=iPhone 6" CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO ONLY_ACTIVE_ARCH=NO
