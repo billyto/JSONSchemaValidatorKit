@@ -11,21 +11,25 @@ import XCTest
 
 class JSONSchemaValidatorKitTests: XCTestCase {
     
-    var schema: NSData?
-    var person: NSData?
-    var badData: NSData?
+    var schema: Data?
+    var person: Data?
+    var badData: Data?
     
     override func setUp() {
         super.setUp()
 
-        let testBundle = NSBundle(forClass: self.dynamicType)
-        let badDataURL = testBundle.URLForResource("not-an-schema", withExtension: "txt")
-        let schemaURL = testBundle.URLForResource("basic-schema", withExtension: "json")
-        let jsonURL = testBundle.URLForResource("person", withExtension: "json")
+        let testBundle = Bundle(for: type(of: self))
+        let badDataURL = testBundle.url(forResource: "not-an-schema", withExtension: "txt")
+        let schemaURL = testBundle.url(forResource: "basic-schema", withExtension: "json")
+        let jsonURL = testBundle.url(forResource: "person", withExtension: "json")
 
-        badData = NSData(contentsOfURL: badDataURL!)
-        schema = NSData(contentsOfURL: schemaURL!)
-        person = NSData(contentsOfURL: jsonURL!)
+        do {
+            
+            badData = try Data(contentsOf: badDataURL!)
+            schema = try Data(contentsOf: schemaURL!)
+            person = try Data(contentsOf: jsonURL!)
+            
+        } catch { }
     
     }
     
@@ -38,7 +42,6 @@ class JSONSchemaValidatorKitTests: XCTestCase {
     func testInvalidNSDATAforSchema() {
     
         XCTAssertThrowsError(try SchemaValidator(withSchema: badData!))
-        
     
     }
     
@@ -55,7 +58,7 @@ class JSONSchemaValidatorKitTests: XCTestCase {
     
     func testSchemaFromDictionary() {
     
-        let tinySchema : [String:AnyObject] = ["title": "Tiniest schema", "type": "object"]
+        let tinySchema : [String:AnyObject] = ["title": "Tiniest schema" as AnyObject, "type": "object" as AnyObject]
         let validator = SchemaValidator(withSchema: tinySchema)
         XCTAssertNotNil(validator)
         
@@ -65,7 +68,7 @@ class JSONSchemaValidatorKitTests: XCTestCase {
     func isValid(result: validationResult) -> Bool {
     
         switch result {
-        case .Failure(_):
+        case .failure(_):
             return false
         default:
             return true
@@ -81,7 +84,7 @@ class JSONSchemaValidatorKitTests: XCTestCase {
             let validator  = try SchemaValidator(withSchema: schema!)
             
             let result : validationResult = validator.validateJSON(badData!)
-            XCTAssertFalse(isValid(result))
+            XCTAssertFalse(isValid(result: result))
             
         }catch {
             
@@ -98,7 +101,7 @@ class JSONSchemaValidatorKitTests: XCTestCase {
         do {
             let validator  = try SchemaValidator(withSchema: schema!)
             let result : validationResult = validator.validateJSON(person!)
-            XCTAssertTrue(isValid(result))
+            XCTAssertTrue(isValid(result: result))
         }catch {
         
             XCTFail()
@@ -107,12 +110,12 @@ class JSONSchemaValidatorKitTests: XCTestCase {
         
     }
     
+    
     func testPerformanceExample() {
         // This is an example of a performance test case.
-        self.measureBlock {
+        self.measure {
             // Put the code you want to measure the time of here.
             do {
-            
                 let validator  = try SchemaValidator(withSchema: self.schema!)
                 validator.validateJSON(self.person!)
             }catch{
