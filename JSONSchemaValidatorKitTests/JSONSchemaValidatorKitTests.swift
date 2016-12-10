@@ -14,6 +14,7 @@ class JSONSchemaValidatorKitTests: XCTestCase {
     var schema: NSData?
     var person: NSData?
     var badData: NSData?
+    var schemaV4: NSData?
     
     override func setUp() {
         super.setUp()
@@ -22,10 +23,12 @@ class JSONSchemaValidatorKitTests: XCTestCase {
         let badDataURL = testBundle.URLForResource("not-an-schema", withExtension: "txt")
         let schemaURL = testBundle.URLForResource("basic-schema", withExtension: "json")
         let jsonURL = testBundle.URLForResource("person", withExtension: "json")
+        let schemaV4URL = testBundle.URLForResource("schema-v4", withExtension: "json")
 
         badData = NSData(contentsOfURL: badDataURL!)
         schema = NSData(contentsOfURL: schemaURL!)
         person = NSData(contentsOfURL: jsonURL!)
+        schemaV4 = NSData(contentsOfURL: schemaV4URL!)
     
     }
     
@@ -104,6 +107,25 @@ class JSONSchemaValidatorKitTests: XCTestCase {
             XCTFail()
         }
         
+        
+    }
+    
+    func testValidateV4itself() {
+        
+        XCTAssertNotNil(schemaV4)
+
+        
+        do {
+            
+            let validator = try SchemaValidator(withSchema: schemaV4!)
+            let result : validationResult = validator.validateJSON(schemaV4!)
+            XCTAssertTrue(isValid(result))
+            
+        } catch {
+          
+            XCTFail()
+            
+        }
         
     }
     

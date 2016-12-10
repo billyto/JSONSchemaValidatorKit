@@ -129,6 +129,8 @@ public class SchemaValidator {
     
         var validation : validationResult = .Success
         
+        //TODO: check on $ref
+        
         validation = typeValidation(jsonObject, withSchema: schema)
         switch validation {
         case .Failure(_):
@@ -644,7 +646,7 @@ public class SchemaValidator {
                 return .Failure("Type \(rawSchemaType) not recognized")
             }
         } else {
-            return .Failure("Type validation not found is schema \(schema)")
+            return .Failure("Type validation not found in schema \(schema)")
 
         }
         
